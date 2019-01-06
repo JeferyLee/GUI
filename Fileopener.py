@@ -31,7 +31,7 @@ def openfile():
         # st.delete('1.0',END)       #1.0指的是第1行第0个字符
         st.insert(END,str1)
 
-
+#this is a function for saving file
 def savefile():
     with open(filename.get(),'w')as f:
         f.write(st.get('1.0',END))
