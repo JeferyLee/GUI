@@ -11,7 +11,7 @@ window.title("for login window")
 window.geometry('500x400')
 
 canvas=tk.Canvas(window,width=500,height=200)
-img_file=tk.PhotoImage(file='D:/pythonApp/GUI/1.gif')
+img_file=tk.PhotoImage(file='1.gif')
 image=canvas.create_image(30,30,anchor='nw',image=img_file)  #将图片置于画布上
 canvas.pack(side='top')
 
