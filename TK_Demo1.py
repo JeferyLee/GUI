@@ -38,10 +38,10 @@ def login():
             usr_info={'admin': '123'}
             pickle.dump(usr_info, usr_file)
 
-    if usr_name in usr_info:   #如果用户名在文件里面
+    if usr_name in usr_info:    # 如果用户名在文件里面
         print('True')
         print(usr_info[usr_name])
-        if usr_pwd == usr_info[usr_name]:  #注意这里的字典变量不能加引号
+        if usr_pwd == usr_info[usr_name]:   # 注意这里的字典变量不能加引号
             tk.messagebox.showinfo(title='Welcome',message='How are you?'+usr_name)
         else:
             tk.messagebox.showinfo(title='Error', message='Your password is wrong,try again!')
@@ -59,26 +59,26 @@ def sign_up():
     lb_pwd=tk.Label(window_signup,text='Password:').place(x=20,y=60)
     lb_pwd_conf = tk.Label(window_signup, text='Password Confirm:').place(x=20, y=100)
 
-    #定义输入框
-    var_new_un=tk.StringVar()
-    new_un_ety=tk.Entry(window_signup,textvariable=var_new_un).place(x=170,y=22)
+    # 定义输入框
+    var_new_un = tk.StringVar()
+    new_un_ety = tk.Entry(window_signup,textvariable=var_new_un).place(x=170,y=22)
 
-    var_new_pwd=tk.StringVar()
-    new_pwd_ety=tk.Entry(window_signup,textvariable=var_new_pwd,show='*').place(x=170,y=62)
+    var_new_pwd = tk.StringVar()
+    new_pwd_ety = tk.Entry(window_signup,textvariable=var_new_pwd,show='*').place(x=170,y=62)
 
-    var_new_pwdconf=tk.StringVar()
-    new_pwdconf_ety=tk.Entry(window_signup,textvariable=var_new_pwdconf,show='*').place(x=170,y=102)
+    var_new_pwdconf = tk.StringVar()
+    new_pwdconf_ety = tk.Entry(window_signup,textvariable=var_new_pwdconf,show='*').place(x=170,y=102)
 
     def signup_success():
         new_un=var_new_un.get()
         new_pwd=var_new_pwd.get()
         new_pwd_conf=var_new_pwdconf.get()
 
-        #先读取已经存在的用户信息文件
+        # 先读取已经存在的用户信息文件
         with open('usr_info.pickle','rb') as usr_file:
-            exist_usrinfo=pickle.load(usr_file)
+            exist_usrinfo = pickle.load(usr_file)
 
-        if new_pwd !=new_pwd_conf:
+        if new_pwd != new_pwd_conf:
             tk.messagebox.showinfo(title='Error!',message=" Password and Password Confirm must be same.")
         elif new_un in exist_usrinfo:
             tk.messagebox.showinfo(message="User name has been signed up.")
