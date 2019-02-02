@@ -6,23 +6,23 @@ import tkinter as tk
 import tkinter.messagebox
 import pickle
 
-window=tk.Tk()
+window = tk.Tk()
 window.title("for login window")
 window.geometry('500x400')
 
-canvas=tk.Canvas(window,width=500,height=200)
-img_file=tk.PhotoImage(file='1.gif')
-image=canvas.create_image(30,30,anchor='nw',image=img_file)  #将图片置于画布上
+canvas = tk.Canvas(window, width=500, height=200)
+img_file = tk.PhotoImage(file='1.gif')
+image = canvas.create_image(30, 30, anchor='nw', image=img_file)   # 将图片置于画布上
 canvas.pack(side='top')
 
-lb1=tk.Label(window,text='User name: ',width=12,height=3).place(x=110,y=180)
-lb2=tk.Label(window,text='Password: ',width=12,height=3).place(x=110,y=220)
+lb1=tk.Label(window,text='User name: ', width=12,height=3).place(x=110,y=180)
+lb2=tk.Label(window,text='Password: ', width=12,height=3).place(x=110,y=220)
 var_un=tk.StringVar()
 var_un.set("example@python.com")
 var_pwd=tk.StringVar()
 
 un_ety=tk.Entry(window,textvariable=var_un).place(x=200,y=200)
-pwd_ety=tk.Entry(window,textvariable=var_pwd,show='*').place(x=200,y=240)  #密码使用show函数
+pwd_ety=tk.Entry(window,textvariable=var_pwd,show='*').place(x=200,y=240)   # 密码使用show函数
 
 def login():
     usr_name=var_un.get()
@@ -34,9 +34,9 @@ def login():
             usr_info=pickle.load(usr_file)
 
     except FileNotFoundError:
-        with open('usr_info.pickle','wb') as usr_file:
-            usr_info={'admin':'123'}
-            pickle.dump(usr_info,usr_file)
+        with open('usr_info.pickle', 'wb') as usr_file:
+            usr_info={'admin': '123'}
+            pickle.dump(usr_info, usr_file)
 
     if usr_name in usr_info:   #如果用户名在文件里面
         print('True')
