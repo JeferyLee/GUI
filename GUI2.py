@@ -227,13 +227,30 @@ def setParam():
     ety_predtyearemp=ttk.Entry(win_setParam)
     ety_predtyearemp.place(x=190,y=550)
 
+
+    #此函数用来将读取的参数应用到excel中
+    def setParamDone():
+        tk.messagebox.showinfo(title='ok',message='参数设置完成！')
+        win_setParam.destroy()
+    def cancelsetParam():
+        win_setParam.destroy()
+
+    #取消按钮
+    btn_cancelsetParam=ttk.Button(win_setParam,text='取消',command=cancelsetParam)
+    btn_cancelsetParam.place(x=300,y=640)
+    #确定按钮
+    btn_confsetParam=ttk.Button(win_setParam,text='设置完成',command=setParamDone)
+    btn_confsetParam.place(x=470,y=640)
+
 def dataCollect():
     pass
 
+def CalcPopemp():
+    pass
 btn_readData = ttk.Button(app, text='数据清洗、过滤',  command=read_data)
 btn_setParam=ttk.Button(app,text='设置参数',command=setParam)
 btn_dataCollect=ttk.Button(app,text='交通小区数据整合',command=dataCollect)
-
+btn_CalcPopemp=ttk.Button(app,text='计算小区人口就业',command=CalcPopemp)
 
 canvas.create_window(1000, 140, width=150, height=40,    #这里的长和宽是定义按钮的长和宽,100和150是按钮的位置
                      window=btn_readData)
@@ -243,5 +260,8 @@ canvas.create_window(1000, 260, width=150, height=40,
 
 canvas.create_window(1000, 380, width=150, height=40,
                      window=btn_dataCollect)
+
+canvas.create_window(1000, 500, width=150, height=40,
+                     window=btn_CalcPopemp)
 
 app.mainloop()
