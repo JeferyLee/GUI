@@ -37,7 +37,7 @@ def read_data():
     win_rddata.maxsize(900, 800)
 
     # 设置标签
-    lb_baseyear = ttk.Label(win_rddata,text='基准年信息', font=('微软雅黑', 20))
+    lb_baseyear = ttk.Label(win_rddata,text='基准年数据处理', font=('微软雅黑', 18))
     lb_baseyear.place(x=50, y=50 )
     #读取基准年人口就业数据
     lb_baseyearrkjy =ttk.Label(win_rddata,text='基准年人口就业数据 : ',font=('微软雅黑', 12))
@@ -84,7 +84,7 @@ def read_data():
 # '--------------------------------------------------'
 
     #设置未来年建筑面积与人口就业数据
-    lb_predtyear=ttk.Label(win_rddata,text='未来年信息',font=('微软雅黑', 20))
+    lb_predtyear=ttk.Label(win_rddata,text='未来年数据处理',font=('微软雅黑', 18))
     lb_predtyear.place(x=50,y=320)
     #未来年建筑面积标签
     lb_predtyearjzmj=ttk.Label(win_rddata,text='未来年分类建筑面积数据 :', font=('微软雅黑', 12 ))
@@ -117,83 +117,83 @@ def setParam():
     lb_scr.place(x=50,y=50)
 
     # 居住消费系数
-    lb_resident=ttk.Label(win_setParam,text='居住',font=('微软雅黑', 12))
+    lb_resident=ttk.Label(win_setParam,text='居住',font=('宋体', 12))
     lb_resident.place(x=50,y=130)
 
     ety_resident=ttk.Entry(win_setParam)
     ety_resident.place(x=140,y=130)
     # 范围
-    lb_residentCstraint=ttk.Label(win_setParam,text='(0~100)',font=('微软雅黑', 12))
+    lb_residentCstraint=ttk.Label(win_setParam,text='(0~100)',font=('宋体', 12))
     lb_residentCstraint.place(x=330,y=130)
 
     # 居住岗位
-    lb_residtEmp=ttk.Label(win_setParam,text='居住岗位',font=('微软雅黑', 12))
+    lb_residtEmp=ttk.Label(win_setParam,text='居住岗位',font=('宋体', 12))
     lb_residtEmp.place(x=50,y=170)
 
     ety_residtEmp=ttk.Entry(win_setParam)
     ety_residtEmp.place(x=140,y=170)
     #范围
-    lb_residtEmpCstraint=ttk.Label(win_setParam,text='(0~100)',font=('微软雅黑', 12))
+    lb_residtEmpCstraint=ttk.Label(win_setParam,text='(0~100)',font=('宋体', 12))
     lb_residtEmpCstraint.place(x=330,y=170)
 
     # 行政办公
-    lb_administ=ttk.Label(win_setParam,text='行政办公',font=('微软雅黑', 12))
+    lb_administ=ttk.Label(win_setParam,text='行政办公',font=('宋体', 12))
     lb_administ.place(x=50,y=210)
 
     ety_administ=ttk.Entry(win_setParam)
     ety_administ.place(x=140,y=210)
 
-    lb_administCstraint=ttk.Label(win_setParam,text='(0~100)',font=('微软雅黑', 12))
+    lb_administCstraint=ttk.Label(win_setParam,text='(0~100)',font=('宋体', 12))
     lb_administCstraint.place(x=330,y=210)
 
     #商业金融
-    lb_commercial=ttk.Label(win_setParam,text='商业金融',font=('微软雅黑', 12))
+    lb_commercial=ttk.Label(win_setParam,text='商业金融',font=('宋体', 12))
     lb_commercial.place(x=50,y=250)
 
     ety_commercial=ttk.Entry(win_setParam)
     ety_commercial.place(x=140,y=250)
 
-    lb_commercialCstraint=ttk.Label(win_setParam,text='(0~100)',font=('微软雅黑', 12))
+    lb_commercialCstraint=ttk.Label(win_setParam,text='(0~100)',font=('宋体', 12))
     lb_commercialCstraint.place(x=330,y=250)
 
     # 教育科研
-    lb_edu=ttk.Label(win_setParam,text='教育科研',font=('微软雅黑', 12))
+    lb_edu=ttk.Label(win_setParam,text='教育科研',font=('宋体', 12))
     lb_edu.place(x=430,y=130)
 
     ety_edu=ttk.Entry(win_setParam)
     ety_edu.place(x=530,y=130)
 
-    lb_eduCstraint=ttk.Label(win_setParam,text='(0~100)',font=('微软雅黑', 12))
+    lb_eduCstraint=ttk.Label(win_setParam,text='(0~100)',font=('宋体', 12))
     lb_eduCstraint.place(x=730,y=130)
 
     #工业仓储
-    lb_industry=ttk.Label(win_setParam,text='工业仓储',font=('微软雅黑', 12))
+    lb_industry=ttk.Label(win_setParam,text='工业仓储',font=('宋体', 12))
     lb_industry.place(x=430,y=170)
 
     ety_industry=ttk.Entry(win_setParam)
     ety_industry.place(x=530,y=170)
 
-    lb_industryCstraint=ttk.Label(win_setParam,text='(0~100)',font=('微软雅黑', 12))
+    lb_industryCstraint=ttk.Label(win_setParam,text='(0~100)',font=('宋体', 12))
     lb_industryCstraint.place(x=730,y=170)
 
     #其他公建
-    lb_commIndus=ttk.Label(win_setParam,text='其他公建',font=('微软雅黑', 12))
+    lb_commIndus=ttk.Label(win_setParam,text='其他公建',font=('宋体', 12))
     lb_commIndus.place(x=430,y=210)
 
     ety_commIndus=ttk.Entry(win_setParam)
     ety_commIndus.place(x=530,y=210)
 
-    lb_commIndusCstraint=ttk.Label(win_setParam,text='(0~100)',font=('微软雅黑', 12))
+    lb_commIndusCstraint=ttk.Label(win_setParam,text='(0~100)',font=('宋体', 12))
     lb_commIndusCstraint.place(x=730,y=210)
 
     #其他用地
-    lb_otherland=ttk.Label(win_setParam,text='其他用地',font=('微软雅黑', 12))
+    lb_otherland=ttk.Label(win_setParam,text='其他用地',font=('宋体', 12))
     lb_otherland.place(x=430,y=250)
 
     ety_otherland=ttk.Entry(win_setParam)
     ety_otherland.place(x=530,y=251)
 
-    lb_otherlandCstraint=ttk.Label(win_setParam,text='(0~100)',font=('微软雅黑', 12))
+    lb_otherlandCstraint=ttk.Label(win_setParam,text='(0~100)',font=('宋体', 12))
     lb_otherlandCstraint.place(x=730,y=251)
 
     cav_rddata = tk.Canvas(win_setParam, width=800, height=50,bg='gray',relief=RAISED)
@@ -207,21 +207,21 @@ def setParam():
     lb_otherimptParam=ttk.Label(win_setParam,text='其他重要参数',font=('宋体','20'))
     lb_otherimptParam.place(x=50,y=350)
     #空置率
-    lb_kzl=ttk.Label(win_setParam,text='空置率:',font=('微软雅黑', 12))
+    lb_kzl=ttk.Label(win_setParam,text='空置率:',font=('宋体', 12))
     lb_kzl.place(x=50,y=430)
 
     ety_kzl=ttk.Entry(win_setParam)
     ety_kzl.place(x=190,y=430)
 
     #预测年总人口
-    lb_predtyearpop=ttk.Label(win_setParam,text='未来年总人口:',font=('微软雅黑', 12))
+    lb_predtyearpop=ttk.Label(win_setParam,text='未来年总人口:',font=('宋体', 12))
     lb_predtyearpop.place(x=50,y=490)
 
     ety_predtyearpop=ttk.Entry(win_setParam)
     ety_predtyearpop.place(x=190,y=490)
 
     # 预测年总就业
-    lb_predtyearemp=ttk.Label(win_setParam,text='未来年总就业:',font=('微软雅黑', 12))
+    lb_predtyearemp=ttk.Label(win_setParam,text='未来年总就业:',font=('宋体', 12))
     lb_predtyearemp.place(x=50,y=550)
 
     ety_predtyearemp=ttk.Entry(win_setParam)
