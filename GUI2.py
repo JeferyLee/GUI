@@ -52,40 +52,66 @@ def read_data():
     #数据清洗与过滤
     def dataClean(df):
         #空值处理
-        df.fillna(0)
-        #负值处理
-        columns_data=list(df)
-        rows_data=len(df)
-        for i in range(0,rows_data):
-            for j in columns_data:
-                value_file=df.loc[i,j]
-                if value_file<0:
-                    df.loc[i,j]=0
-        print(df)
-        return df
+        try:
+            df.fillna(0)
+            #负值处理
+            columns_data=list(df)
+            rows_data=len(df)
+            for i in range(0,rows_data):
+                for j in columns_data:
+                    value_file=df.loc[i,j]
+                    if value_file<0:
+                        df.loc[i,j]=0
+            print(df)
+            return df
+        except TypeError as e:
+            tk.messagebox.showinfo(message='请选择正确的人口就业文件')
 
     #读取基准年人口就业输入数据
+    global file_byrkjyinput
+    global var_byrkjyinput
+    global df_byrkjyinput
+    global df_afterres     #处理后的文件
+    df_afterres = 0
     def open_byrkjyinput():
         file_byrkjyinput=filedialog.askopenfilename(title='打开基准年人口就业数据',filetypes=[('Excel', '*.xlsx '), ('All Files', '*')])
-        df_afterres=dataClean(file_byrkjyinput)
-        return df_afterres
-        print(file_byrkjyinput)
 
-    #存放基准年人口就业输出数据
-    def open_byrkjyoutput():
-        file_byrkjyoutput=filedialog.askopenfilename(title='存放基准年人口就业数据',filetypes=[('Excel', '*.xlsx '), ('All Files', '*')])
-        print(file_byrkjyoutput)
+        # return df_afterres
+        var_byrkjyinput.set(str(file_byrkjyinput))
+        # print(file_byrkjyinput)   #返回文件名
+
+    global var_byrkjyoutput
+    #保存基准年人口就业输出数据
+    def save_byrkjyoutput():
+
+        file_byrkjyoutput=filedialog.asksaveasfilename(title='存放基准年人口就业数据',filetypes=[('Excel', '*.xlsx '), ('All Files', '*')])
+        # print(file_byrkjyoutput)
+        var_byrkjyoutput.set(str(file_byrkjyoutput)+'.xlsx')
+        save_path=str(file_byrkjyoutput)+'.xlsx'
+        # print(save_path,type(save_path))
+        # df_byrkjyinput = pd.read_excel(file_byrkjyinput)
+        # df_afterres = dataClean(df_byrkjyinput)
+        # print(df_afterres)
+        # if  isinstance(df_afterres,pd.DataFrame):
+        #     df_afterres.to_excel(save_path,'Sheet1')
+        #     tk.messagebox.showinfo(message='done...')
+        # else:
+        #     tk.messagebox.showinfo(message='请先选择基准年人口就业数据')
+
+
     #基准年人口就业
-    ety_byrkjyinput=ttk.Entry(win_rddata)
+    var_byrkjyinput=tk.StringVar()
+    ety_byrkjyinput=ttk.Entry(win_rddata,textvariable=var_byrkjyinput)
     ety_byrkjyinput .place(x=320, y=150)
 
-    ety_byrkjyoutput=ttk.Entry(win_rddata)
+    var_byrkjyoutput=tk.StringVar()
+    ety_byrkjyoutput=ttk.Entry(win_rddata,textvariable=var_byrkjyoutput)
     ety_byrkjyoutput.place(x=320,y=190)
 
     btn_byrkjyinput=ttk.Button(win_rddata,text='选择', command=open_byrkjyinput)
     btn_byrkjyinput.place(x=540,y=150)
 
-    btn_byrkjyoutput=ttk.Button(win_rddata,text='选择',command=open_byrkjyoutput)
+    btn_byrkjyoutput=ttk.Button(win_rddata,text='选择',command=save_byrkjyoutput)
     btn_byrkjyoutput.place(x=540,y=190)
 
 
@@ -168,6 +194,17 @@ def read_data():
     #选择按钮
     btn_predtyearkdx=ttk.Button(win_rddata,text='选择')
     btn_predtyearkdx.place(x=540,y=585)
+
+    def cancelReaddata():
+        win_rddata.destroy()
+
+    def confReaddata():
+        tk.messagebox.showinfo(title='',message='数据清洗完成！')
+    btn_cancelReaddata=ttk.Button(win_rddata,text='取消',command=cancelReaddata)
+    btn_cancelReaddata.place(x=260,y=640)
+
+    btn_confReaddata=ttk.Button(win_rddata,text='确定',command=confReaddata)
+    btn_confReaddata.place(x=440,y=640)
 
 def setParam():
     win_setParam = tk.Toplevel(app)
