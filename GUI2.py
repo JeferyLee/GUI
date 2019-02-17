@@ -52,18 +52,20 @@ def read_data():
     #数据清洗与过滤
     def dataClean(df):
         #空值处理
+        print('before res...')
+        print(df)
         try:
-            df.fillna(0)
+            dfres=df.fillna(0)
             #负值处理
-            columns_data=list(df)
-            rows_data=len(df)
+            columns_data=list(dfres)
+            rows_data=len(dfres)
             for i in range(0,rows_data):
                 for j in columns_data:
-                    value_file=df.loc[i,j]
+                    value_file=dfres.loc[i,j]
                     if value_file<0:
-                        df.loc[i,j]=0
-            print(df)
-            return df
+                        dfres.loc[i,j]=0
+
+            return dfres
         except TypeError as e:
             tk.messagebox.showinfo(message='请选择正确的人口就业文件')
 
@@ -87,16 +89,23 @@ def read_data():
         file_byrkjyoutput=filedialog.asksaveasfilename(title='存放基准年人口就业数据',filetypes=[('Excel', '*.xlsx '), ('All Files', '*')])
         # print(file_byrkjyoutput)
         var_byrkjyoutput.set(str(file_byrkjyoutput)+'.xlsx')
-        save_path=str(file_byrkjyoutput)+'.xlsx'
+        # print(var_byrkjyinput.get())
+
+        #定义文件存放路径
+        save_path=str(var_byrkjyoutput.get())
+
+        #获取人口就业输入框路径
+        read_path=str(var_byrkjyinput.get())
         # print(save_path,type(save_path))
-        # df_byrkjyinput = pd.read_excel(file_byrkjyinput)
-        # df_afterres = dataClean(df_byrkjyinput)
-        # print(df_afterres)
-        # if  isinstance(df_afterres,pd.DataFrame):
-        #     df_afterres.to_excel(save_path,'Sheet1')
-        #     tk.messagebox.showinfo(message='done...')
-        # else:
-        #     tk.messagebox.showinfo(message='请先选择基准年人口就业数据')
+        df_byrkjyinput = pd.read_excel(read_path,'Sheet1')
+        df_afterres = dataClean(df_byrkjyinput)
+        print('after res....')
+        print(df_afterres)
+        if  isinstance(df_afterres,pd.DataFrame):
+            df_afterres.to_excel(save_path,'Sheet1')
+            tk.messagebox.showinfo(message='done...')
+        else:
+            tk.messagebox.showinfo(message='请先选择基准年人口就业数据')
 
 
     #基准年人口就业
