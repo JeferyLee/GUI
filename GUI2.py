@@ -38,16 +38,16 @@ def read_data():
 
     # 设置标签
     lb_baseyear = ttk.Label(win_rddata,text='基准年数据处理', font=('微软雅黑', 16))
-    lb_baseyear.place(x=100, y=50 )
+    lb_baseyear.place(x=100, y=30 )
     #读取基准年人口就业数据
     lb_baseyearrkjy =ttk.Label(win_rddata,text='基准年人口就业数据 : ',font=('微软雅黑', 13))
-    lb_baseyearrkjy.place(x=100,y=105)
+    lb_baseyearrkjy.place(x=100,y=85)
 
     lb_byrkjyinput=ttk.Label(win_rddata,text='输入文件位置：',font=('宋体', 12))
-    lb_byrkjyinput.place(x=155,y=150)
+    lb_byrkjyinput.place(x=155,y=130)
 
     lb_byrkjyoutput=ttk.Label(win_rddata,text='输出文件位置: ',font=('宋体', 12))
-    lb_byrkjyoutput.place(x=155,y=190)
+    lb_byrkjyoutput.place(x=155,y=170)
 
     #数据清洗与过滤
     def dataClean(df):
@@ -64,102 +64,112 @@ def read_data():
                     value_file=dfres.loc[i,j]
                     if value_file<0:
                         dfres.loc[i,j]=0
-
             return dfres
         except TypeError as e:
             tk.messagebox.showinfo(message='请选择正确的人口就业文件')
 
     #读取基准年人口就业输入数据
     global file_byrkjyinput
-    global var_byrkjyinput
     global df_byrkjyinput
-    global df_afterres     #处理后的文件
-    df_afterres = 0
+
     def open_byrkjyinput():
         file_byrkjyinput=filedialog.askopenfilename(title='打开基准年人口就业数据',filetypes=[('Excel', '*.xlsx '), ('All Files', '*')])
-
-        # return df_afterres
         var_byrkjyinput.set(str(file_byrkjyinput))
-        # print(file_byrkjyinput)   #返回文件名
 
     global var_byrkjyoutput
     #保存基准年人口就业输出数据
     def save_byrkjyoutput():
+        try:
+            file_byrkjyoutput=filedialog.asksaveasfilename(title='存放基准年人口就业数据',filetypes=[('Excel', '*.xlsx '), ('All Files', '*')])
+            var_byrkjyoutput.set(str(file_byrkjyoutput)+'.xlsx')
+            # print(var_byrkjyinput.get())
 
-        file_byrkjyoutput=filedialog.asksaveasfilename(title='存放基准年人口就业数据',filetypes=[('Excel', '*.xlsx '), ('All Files', '*')])
-        # print(file_byrkjyoutput)
-        var_byrkjyoutput.set(str(file_byrkjyoutput)+'.xlsx')
-        # print(var_byrkjyinput.get())
+            #定义文件存放路径
+            save_path=str(var_byrkjyoutput.get())
 
-        #定义文件存放路径
-        save_path=str(var_byrkjyoutput.get())
+            #获取人口就业输入框路径
+            read_path=str(var_byrkjyinput.get())
+            df_byrkjyinput = pd.read_excel(read_path,'Sheet1')
+            df_afterres = dataClean(df_byrkjyinput)
 
-        #获取人口就业输入框路径
-        read_path=str(var_byrkjyinput.get())
-        # print(save_path,type(save_path))
-        df_byrkjyinput = pd.read_excel(read_path,'Sheet1')
-        df_afterres = dataClean(df_byrkjyinput)
-        print('after res....')
-        print(df_afterres)
-        if  isinstance(df_afterres,pd.DataFrame):
-            df_afterres.to_excel(save_path,'Sheet1')
-            tk.messagebox.showinfo(message='done...')
-        else:
-            tk.messagebox.showinfo(message='请先选择基准年人口就业数据')
+            if  isinstance(df_afterres,pd.DataFrame):
+                df_afterres.to_excel(save_path,'Sheet1')
+                tk.messagebox.showinfo(message='done...')
+            else:
+                tk.messagebox.showinfo(message='请先选择基准年人口就业数据')
+        except FileNotFoundError as e:
+            print('未选择文件!')
 
 
     #基准年人口就业
     var_byrkjyinput=tk.StringVar()
     ety_byrkjyinput=ttk.Entry(win_rddata,textvariable=var_byrkjyinput)
-    ety_byrkjyinput .place(x=320, y=150)
+    ety_byrkjyinput .place(x=320, y=130)
 
     var_byrkjyoutput=tk.StringVar()
     ety_byrkjyoutput=ttk.Entry(win_rddata,textvariable=var_byrkjyoutput)
-    ety_byrkjyoutput.place(x=320,y=190)
+    ety_byrkjyoutput.place(x=320,y=170)
 
     btn_byrkjyinput=ttk.Button(win_rddata,text='选择', command=open_byrkjyinput)
-    btn_byrkjyinput.place(x=540,y=150)
+    btn_byrkjyinput.place(x=540,y=130)
 
     btn_byrkjyoutput=ttk.Button(win_rddata,text='选择',command=save_byrkjyoutput)
-    btn_byrkjyoutput.place(x=540,y=190)
+    btn_byrkjyoutput.place(x=540,y=170)
 
 
     #基准年建筑面积数据读取
     lb_baseyearjz=ttk.Label(win_rddata, text='基准年建筑面积数据（如有）: ', font=('微软雅黑', 13))
-    lb_baseyearjz.place(x=100, y=230)
+    lb_baseyearjz.place(x=100, y=210)
 
     lb_byjzmjinput=ttk.Label(win_rddata,text='输入文件位置：',font=('宋体', 12))
-    lb_byjzmjinput.place(x=155,y=275)
+    lb_byjzmjinput.place(x=155,y=255)
 
     lb_byjzmjoutput=ttk.Label(win_rddata,text='输出文件位置：',font=('宋体', 12))
-    lb_byjzmjoutput.place(x=155,y=315)
+    lb_byjzmjoutput.place(x=155,y=295)
 
     # var_rkgw=tk.StringVar()
     #设置为读取的基准年建筑面积数据名称
-    # var_rkgw.set(str(file_baseyearjzmj))
-    ety_byjzmjinput=ttk.Entry(win_rddata)
-    ety_byjzmjinput.place(x=320, y=275)
+    var_byjzmjinput=tk.StringVar()
+    ety_byjzmjinput=ttk.Entry(win_rddata,textvariable=var_byjzmjinput)
+    ety_byjzmjinput.place(x=320, y=255)
 
-    ety_byjzmjoutput=ttk.Entry(win_rddata)
-    ety_byjzmjoutput.place(x=320,y=315)
+    var_byjzmjoutput=tk.StringVar()
+    ety_byjzmjoutput=ttk.Entry(win_rddata,textvariable=var_byjzmjoutput)
+    ety_byjzmjoutput.place(x=320,y=295)
 
     def open_byjzmjinput():
         file_byjzmjinput=filedialog.askopenfilename(title='打开基准年建筑面积数据',filetypes=[('Excel','*.xlsx'),('All Files','*')])
-        print(file_byjzmjinput)
+        var_byjzmjinput.set(str(file_byjzmjinput))
 
-    def open_byjzmjoutput():
-        file_byjzmjoutput=filedialog.askopenfilename(title='存放基准年建筑面积数据',filetypes=[('Excel','*.xlsx'),('All Files','*')])
-        print(file_byjzmjoutput)
+    def save_byjzmjoutput():
+        try:
+            file_byjzmjoutput=filedialog.asksaveasfilename(title='存放基准年建筑面积数据',filetypes=[('Excel','*.xlsx'),('All Files','*')])
+            var_byjzmjoutput.set(str(file_byjzmjoutput)+'.xlsx')
+
+            save_path=str(var_byjzmjoutput.get())
+
+            read_path=str(var_byjzmjinput.get())
+            df_byjzmjinput = pd.read_excel(read_path, 'Sheet1')
+            df_afterres = dataClean(df_byjzmjinput)
+
+            if isinstance(df_afterres, pd.DataFrame):
+                df_afterres.to_excel(save_path, 'Sheet1')
+                tk.messagebox.showinfo(message='done...')
+            else:
+                tk.messagebox.showinfo(message='请先选择基准年建筑面积数据')
+
+        except FileNotFoundError as e:
+            print('未选择文件!')
 
     btn_byjzmjinput=ttk.Button(win_rddata, text='选择',command=open_byjzmjinput)
-    btn_byjzmjinput.place(x=540, y=275 )
+    btn_byjzmjinput.place(x=540, y=255 )
 
-    btn_byjzmjoutput=ttk.Button(win_rddata,text='选择',comman=open_byjzmjoutput)
-    btn_byjzmjoutput.place(x=540,y=315)
+    btn_byjzmjoutput=ttk.Button(win_rddata,text='选择',comman=save_byjzmjoutput)
+    btn_byjzmjoutput.place(x=540,y=295)
 
     # 设置数据清洗子窗口的画布
     cav_rddata=tk.Canvas(win_rddata, width=800, height=10)
-    cav_rddata.place(x=0, y=350)
+    cav_rddata.place(x=0, y=330)
 
     cav_rddata.create_line(50, 10, 800, 10, fill='black')   #这里需要别的参数去修正？
 
@@ -168,41 +178,75 @@ def read_data():
 
     #设置未来年建筑面积与人口就业数据
     lb_predtyear=ttk.Label(win_rddata,text='未来年数据处理',font=('微软雅黑', 16))
-    lb_predtyear.place(x=100,y=370)
+    lb_predtyear.place(x=100,y=350)
     #未来年建筑面积标签
     lb_pdyjzmj=ttk.Label(win_rddata,text='未来年分类建筑面积数据 :', font=('微软雅黑', 13 ))
-    lb_pdyjzmj.place(x=100,y=420)
+    lb_pdyjzmj.place(x=100,y=400)
 
     lb_pdyjzmjinput=ttk.Label(win_rddata,text='输入文件位置：',font=('宋体', 12))
-    lb_pdyjzmjinput.place(x=155,y=465)
+    lb_pdyjzmjinput.place(x=155,y=445)
 
     lb_pdyjzmjoutput=ttk.Label(win_rddata,text='输出文件位置：',font=('宋体', 12))
-    lb_pdyjzmjoutput.place(x=155,y=505)
+    lb_pdyjzmjoutput.place(x=155,y=485)
     #输入框
-    ety_pdyjzmjinput=ttk.Entry(win_rddata)
-    ety_pdyjzmjinput.place(x=320,y=465)
+    var_pdyjzmjinput=tk.StringVar()
+    ety_pdyjzmjinput=ttk.Entry(win_rddata,textvariable=var_pdyjzmjinput)
+    ety_pdyjzmjinput.place(x=320,y=445)
 
-    ety_pdyjzmjoutput=ttk.Entry(win_rddata)
-    ety_pdyjzmjoutput.place(x=320,y=505)
+    var_pdyjzmjoutput=tk.StringVar()
+    ety_pdyjzmjoutput=ttk.Entry(win_rddata,textvariable=var_pdyjzmjoutput)
+    ety_pdyjzmjoutput.place(x=320,y=485)
+
+    def open_pdyjzmjinput():
+        file_pdyjzmjinput=filedialog.askopenfilename(title='打开预测年建筑面积',filetypes=[('Excel','*.xlsx'),('All Files','*')])
+        var_pdyjzmjinput.set(str(file_pdyjzmjinput))
+
+    def save_pdyjzmjoutput():
+        try:
+            file_pdyjzmjoutput = filedialog.asksaveasfilename(title='存放基准年建筑面积数据',filetypes=[('Excel', '*.xlsx'), ('All Files', '*')])
+
+            var_pdyjzmjoutput.set(str(file_pdyjzmjoutput)+'.xlsx')
+            #这里对有无后缀进行判断
+            save_path = str(var_pdyjzmjoutput.get())
+
+            read_path = str(var_pdyjzmjinput.get())
+            df_pdyjzmjinput = pd.read_excel(read_path, 'Sheet1')
+            df_afterres = dataClean(df_pdyjzmjinput)
+
+            if isinstance(df_afterres, pd.DataFrame):
+                df_afterres.to_excel(save_path, 'Sheet1')
+                tk.messagebox.showinfo(message='done...')
+            else:
+                tk.messagebox.showinfo(message='请先选择基准年建筑面积数据')
+
+        except FileNotFoundError as e:
+            print('未选择文件!')
+
     #选择
-    btn_pdyjzmjinput=ttk.Button(win_rddata,text='选择')
-    btn_pdyjzmjinput.place(x=540,y=465)
+    btn_pdyjzmjinput=ttk.Button(win_rddata,text='选择',command=open_pdyjzmjinput)
+    btn_pdyjzmjinput.place(x=540,y=445)
 
-    btn_pdyjzmjoutput=ttk.Button(win_rddata,text='选择')
-    btn_pdyjzmjoutput.place(x=540,y=505)
+    btn_pdyjzmjoutput=ttk.Button(win_rddata,text='选择',command=save_pdyjzmjoutput)
+    btn_pdyjzmjoutput.place(x=540,y=485)
 
     #未来年交通小区可达性
     lb_predtyearkdx=ttk.Label(win_rddata,text='未来年交通小区可达性数据：',font=('微软雅黑', 12 ))
-    lb_predtyearkdx.place(x=100,y=540)
+    lb_predtyearkdx.place(x=100,y=520)
 
     lb_pdykdx=ttk.Label(win_rddata,text='输入文件位置: ',font=('宋体', 12))
-    lb_pdykdx.place(x=155,y=585)
+    lb_pdykdx.place(x=155,y=565)
     #设置输入框
-    entry_predtyearkdx=ttk.Entry(win_rddata)
-    entry_predtyearkdx.place(x=320,y=585)
+    var_pdykdx=tk.StringVar()
+    entry_predtyearkdx=ttk.Entry(win_rddata,textvariable=var_pdykdx)
+    entry_predtyearkdx.place(x=320,y=565)
     #选择按钮
-    btn_predtyearkdx=ttk.Button(win_rddata,text='选择')
-    btn_predtyearkdx.place(x=540,y=585)
+
+    def  open_pdykdx():
+        file_pdykdx=filedialog.askopenfilename(title='打开可达性文件',filetypes=[('Excel', '*.xlsx'), ('All Files', '*')])
+        var_pdykdx.set(str(file_pdykdx))
+
+    btn_pdykdx=ttk.Button(win_rddata,text='选择',command=open_pdykdx)
+    btn_pdykdx.place(x=540,y=565)
 
     def cancelReaddata():
         win_rddata.destroy()
@@ -215,6 +259,9 @@ def read_data():
     btn_confReaddata=ttk.Button(win_rddata,text='确定',command=confReaddata)
     btn_confReaddata.place(x=440,y=640)
 
+
+#设置参数界面
+#'----------------------------------------'
 def setParam():
     win_setParam = tk.Toplevel(app)
     win_setParam.title("设置相关参数")
@@ -222,119 +269,120 @@ def setParam():
     win_setParam.maxsize(900, 800)
 
     #设置空间消费系数标签
-    lb_scr=ttk.Label(win_setParam,text='空间消费系数', font=('宋体', 20))
+    lb_scr=ttk.Label(win_setParam,text='空间消费系数', font=('微软雅黑', 18))
     lb_scr.place(x=50,y=50)
 
     # 居住消费系数
     lb_resident=ttk.Label(win_setParam,text='居住',font=('宋体', 12))
-    lb_resident.place(x=50,y=130)
+    lb_resident.place(x=70,y=130)
 
     ety_resident=ttk.Entry(win_setParam)
-    ety_resident.place(x=140,y=130)
+    ety_resident.place(x=160,y=130)
     # 范围
-    lb_residentCstraint=ttk.Label(win_setParam,text='(0~100)',font=('宋体', 12))
-    lb_residentCstraint.place(x=330,y=130)
+    lb_residentCstraint=ttk.Label(win_setParam,text='(0-150)',font=('宋体', 12))
+    lb_residentCstraint.place(x=350,y=130)
 
     # 居住岗位
     lb_residtEmp=ttk.Label(win_setParam,text='居住岗位',font=('宋体', 12))
-    lb_residtEmp.place(x=50,y=170)
+    lb_residtEmp.place(x=70,y=170)
 
     ety_residtEmp=ttk.Entry(win_setParam)
-    ety_residtEmp.place(x=140,y=170)
+    ety_residtEmp.place(x=160,y=170)
     #范围
-    lb_residtEmpCstraint=ttk.Label(win_setParam,text='(0~100)',font=('宋体', 12))
-    lb_residtEmpCstraint.place(x=330,y=170)
+    lb_residtEmpCstraint=ttk.Label(win_setParam,text='(0-150)',font=('宋体', 12))
+    lb_residtEmpCstraint.place(x=350,y=170)
 
     # 行政办公
     lb_administ=ttk.Label(win_setParam,text='行政办公',font=('宋体', 12))
-    lb_administ.place(x=50,y=210)
+    lb_administ.place(x=70,y=210)
 
     ety_administ=ttk.Entry(win_setParam)
-    ety_administ.place(x=140,y=210)
+    ety_administ.place(x=160,y=210)
 
-    lb_administCstraint=ttk.Label(win_setParam,text='(0~100)',font=('宋体', 12))
-    lb_administCstraint.place(x=330,y=210)
+    lb_administCstraint=ttk.Label(win_setParam,text='(0-150)',font=('宋体', 12))
+    lb_administCstraint.place(x=350,y=210)
 
     #商业金融
     lb_commercial=ttk.Label(win_setParam,text='商业金融',font=('宋体', 12))
-    lb_commercial.place(x=50,y=250)
+    lb_commercial.place(x=70,y=250)
 
     ety_commercial=ttk.Entry(win_setParam)
-    ety_commercial.place(x=140,y=250)
+    ety_commercial.place(x=160,y=250)
 
-    lb_commercialCstraint=ttk.Label(win_setParam,text='(0~100)',font=('宋体', 12))
-    lb_commercialCstraint.place(x=330,y=250)
+    lb_commercialCstraint=ttk.Label(win_setParam,text='(0-150)',font=('宋体', 12))
+    lb_commercialCstraint.place(x=350,y=250)
 
     # 教育科研
     lb_edu=ttk.Label(win_setParam,text='教育科研',font=('宋体', 12))
-    lb_edu.place(x=430,y=130)
+    lb_edu.place(x=460,y=130)
 
     ety_edu=ttk.Entry(win_setParam)
-    ety_edu.place(x=530,y=130)
+    ety_edu.place(x=560,y=130)
 
-    lb_eduCstraint=ttk.Label(win_setParam,text='(0~100)',font=('宋体', 12))
-    lb_eduCstraint.place(x=730,y=130)
+    lb_eduCstraint=ttk.Label(win_setParam,text='(0-150)',font=('宋体', 12))
+    lb_eduCstraint.place(x=760,y=130)
 
     #工业仓储
     lb_industry=ttk.Label(win_setParam,text='工业仓储',font=('宋体', 12))
-    lb_industry.place(x=430,y=170)
+    lb_industry.place(x=460,y=170)
 
     ety_industry=ttk.Entry(win_setParam)
-    ety_industry.place(x=530,y=170)
+    ety_industry.place(x=560,y=170)
 
-    lb_industryCstraint=ttk.Label(win_setParam,text='(0~100)',font=('宋体', 12))
-    lb_industryCstraint.place(x=730,y=170)
+    lb_industryCstraint=ttk.Label(win_setParam,text='(0-150)',font=('宋体', 12))
+    lb_industryCstraint.place(x=760,y=170)
 
     #其他公建
     lb_commIndus=ttk.Label(win_setParam,text='其他公建',font=('宋体', 12))
-    lb_commIndus.place(x=430,y=210)
+    lb_commIndus.place(x=460,y=210)
 
     ety_commIndus=ttk.Entry(win_setParam)
-    ety_commIndus.place(x=530,y=210)
+    ety_commIndus.place(x=560,y=210)
 
-    lb_commIndusCstraint=ttk.Label(win_setParam,text='(0~100)',font=('宋体', 12))
-    lb_commIndusCstraint.place(x=730,y=210)
+    lb_commIndusCstraint=ttk.Label(win_setParam,text='(0-150)',font=('宋体', 12))
+    lb_commIndusCstraint.place(x=760,y=210)
 
     #其他用地
     lb_otherland=ttk.Label(win_setParam,text='其他用地',font=('宋体', 12))
-    lb_otherland.place(x=430,y=250)
+    lb_otherland.place(x=460,y=250)
 
     ety_otherland=ttk.Entry(win_setParam)
-    ety_otherland.place(x=530,y=251)
+    ety_otherland.place(x=560,y=251)
 
-    lb_otherlandCstraint=ttk.Label(win_setParam,text='(0~100)',font=('宋体', 12))
-    lb_otherlandCstraint.place(x=730,y=251)
+    lb_otherlandCstraint=ttk.Label(win_setParam,text='(0-150)',font=('宋体', 12))
+    lb_otherlandCstraint.place(x=760,y=251)
 
-    cav_rddata = tk.Canvas(win_setParam, width=800, height=50,bg='gray',relief=RAISED)
-    cav_rddata.place(x=0, y=280)
-    cav_rddata.create_line(0, 0, 200, 50, fill='red')
-    cav_rddata.create_line(0, 50, 400, 50, fill='black')
-
+    cav_rddata = tk.Canvas(win_setParam, width=800, height=10,relief=RAISED)
+    cav_rddata.place(x=0, y=290)
+    cav_rddata.create_line(50, 10, 800, 10, fill='black')
 
 
     #其他重要参数
-    lb_otherimptParam=ttk.Label(win_setParam,text='其他重要参数',font=('宋体','20'))
-    lb_otherimptParam.place(x=50,y=350)
+    lb_otherimptParam=ttk.Label(win_setParam,text='其他重要参数',font=('微软雅黑','16'))
+    lb_otherimptParam.place(x=50,y=320)
     #空置率
     lb_kzl=ttk.Label(win_setParam,text='空置率:',font=('宋体', 12))
-    lb_kzl.place(x=50,y=430)
+    lb_kzl.place(x=80,y=380)
 
     ety_kzl=ttk.Entry(win_setParam)
-    ety_kzl.place(x=190,y=430)
+    ety_kzl.place(x=220,y=380)
+
+    lb_kzlCstraint=ttk.Label(win_setParam,text='(0-1)',font=('宋体', 12))
+    lb_kzlCstraint.place(x=410,y=380)
 
     #预测年总人口
     lb_predtyearpop=ttk.Label(win_setParam,text='未来年总人口:',font=('宋体', 12))
-    lb_predtyearpop.place(x=50,y=490)
+    lb_predtyearpop.place(x=80,y=430)
 
     ety_predtyearpop=ttk.Entry(win_setParam)
-    ety_predtyearpop.place(x=190,y=490)
+    ety_predtyearpop.place(x=220,y=430)
 
     # 预测年总就业
     lb_predtyearemp=ttk.Label(win_setParam,text='未来年总就业:',font=('宋体', 12))
-    lb_predtyearemp.place(x=50,y=550)
+    lb_predtyearemp.place(x=80,y=480)
 
     ety_predtyearemp=ttk.Entry(win_setParam)
-    ety_predtyearemp.place(x=190,y=550)
+    ety_predtyearemp.place(x=220,y=480)
 
 
     #此函数用来将读取的参数应用到excel中
@@ -346,10 +394,10 @@ def setParam():
 
     #取消按钮
     btn_cancelsetParam=ttk.Button(win_setParam,text='取消',command=cancelsetParam)
-    btn_cancelsetParam.place(x=300,y=640)
+    btn_cancelsetParam.place(x=300,y=590)
     #确定按钮
     btn_confsetParam=ttk.Button(win_setParam,text='设置完成',command=setParamDone)
-    btn_confsetParam.place(x=470,y=640)
+    btn_confsetParam.place(x=470,y=590)
 
 def dataCollect():
     pass
