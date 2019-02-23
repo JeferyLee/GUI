@@ -241,17 +241,30 @@ def read_data():
     entry_predtyearkdx.place(x=320,y=565)
     #选择按钮
 
+    global df_pdykdx
+    #不能声明为全局变量
+    # global var_pdykdx
     def  open_pdykdx():
         file_pdykdx=filedialog.askopenfilename(title='打开可达性文件',filetypes=[('Excel', '*.xlsx'), ('All Files', '*')])
         var_pdykdx.set(str(file_pdykdx))
+        df_pdykdx=pd.read_excel(str(file_pdykdx))
 
     btn_pdykdx=ttk.Button(win_rddata,text='选择',command=open_pdykdx)
     btn_pdykdx.place(x=540,y=565)
 
+    #function
+    def getkdx():
+        kdxfilename=var_pdykdx.get()
+        if kdxfilename is not None:
+            df_pdykdx=pd.read_excel(str(kdxfilename))
+            print(df_pdykdx)
     def cancelReaddata():
         win_rddata.destroy()
 
     def confReaddata():
+        testfile=getkdx()
+        print(testfile)
+
         tk.messagebox.showinfo(title='',message='数据清洗完成！')
     btn_cancelReaddata=ttk.Button(win_rddata,text='取消',command=cancelReaddata)
     btn_cancelReaddata.place(x=260,y=640)
@@ -262,6 +275,12 @@ def read_data():
 
 #设置参数界面
 #'----------------------------------------'
+global pdypop
+global pdyemp
+
+#为空间消费系数定义一个list
+global list_SCR
+list_SCR=[]
 def setParam():
     win_setParam = tk.Toplevel(app)
     win_setParam.title("设置相关参数")
@@ -276,7 +295,9 @@ def setParam():
     lb_resident=ttk.Label(win_setParam,text='居住',font=('宋体', 12))
     lb_resident.place(x=70,y=130)
 
-    ety_resident=ttk.Entry(win_setParam)
+    #空间消费系数应为double型
+    var_resident=tk.DoubleVar()
+    ety_resident=ttk.Entry(win_setParam,textvariable=var_resident)
     ety_resident.place(x=160,y=130)
     # 范围
     lb_residentCstraint=ttk.Label(win_setParam,text='(0-150)',font=('宋体', 12))
@@ -286,7 +307,8 @@ def setParam():
     lb_residtEmp=ttk.Label(win_setParam,text='居住岗位',font=('宋体', 12))
     lb_residtEmp.place(x=70,y=170)
 
-    ety_residtEmp=ttk.Entry(win_setParam)
+    var_residtEmp=tk.DoubleVar()
+    ety_residtEmp=ttk.Entry(win_setParam,textvariable=var_residtEmp)
     ety_residtEmp.place(x=160,y=170)
     #范围
     lb_residtEmpCstraint=ttk.Label(win_setParam,text='(0-150)',font=('宋体', 12))
@@ -296,7 +318,8 @@ def setParam():
     lb_administ=ttk.Label(win_setParam,text='行政办公',font=('宋体', 12))
     lb_administ.place(x=70,y=210)
 
-    ety_administ=ttk.Entry(win_setParam)
+    var_administ=tk.DoubleVar()
+    ety_administ=ttk.Entry(win_setParam,textvariable=var_administ)
     ety_administ.place(x=160,y=210)
 
     lb_administCstraint=ttk.Label(win_setParam,text='(0-150)',font=('宋体', 12))
@@ -306,7 +329,8 @@ def setParam():
     lb_commercial=ttk.Label(win_setParam,text='商业金融',font=('宋体', 12))
     lb_commercial.place(x=70,y=250)
 
-    ety_commercial=ttk.Entry(win_setParam)
+    var_commercial=tk.DoubleVar()
+    ety_commercial=ttk.Entry(win_setParam,textvariable=var_commercial)
     ety_commercial.place(x=160,y=250)
 
     lb_commercialCstraint=ttk.Label(win_setParam,text='(0-150)',font=('宋体', 12))
@@ -316,7 +340,8 @@ def setParam():
     lb_edu=ttk.Label(win_setParam,text='教育科研',font=('宋体', 12))
     lb_edu.place(x=460,y=130)
 
-    ety_edu=ttk.Entry(win_setParam)
+    var_edu=tk.DoubleVar()
+    ety_edu=ttk.Entry(win_setParam,textvariable=var_edu)
     ety_edu.place(x=560,y=130)
 
     lb_eduCstraint=ttk.Label(win_setParam,text='(0-150)',font=('宋体', 12))
@@ -326,7 +351,8 @@ def setParam():
     lb_industry=ttk.Label(win_setParam,text='工业仓储',font=('宋体', 12))
     lb_industry.place(x=460,y=170)
 
-    ety_industry=ttk.Entry(win_setParam)
+    var_industry=tk.DoubleVar()
+    ety_industry=ttk.Entry(win_setParam,textvariable=var_industry)
     ety_industry.place(x=560,y=170)
 
     lb_industryCstraint=ttk.Label(win_setParam,text='(0-150)',font=('宋体', 12))
@@ -336,7 +362,8 @@ def setParam():
     lb_commIndus=ttk.Label(win_setParam,text='其他公建',font=('宋体', 12))
     lb_commIndus.place(x=460,y=210)
 
-    ety_commIndus=ttk.Entry(win_setParam)
+    var_commindus=tk.DoubleVar()
+    ety_commIndus=ttk.Entry(win_setParam,textvariable=var_commindus)
     ety_commIndus.place(x=560,y=210)
 
     lb_commIndusCstraint=ttk.Label(win_setParam,text='(0-150)',font=('宋体', 12))
@@ -346,7 +373,8 @@ def setParam():
     lb_otherland=ttk.Label(win_setParam,text='其他用地',font=('宋体', 12))
     lb_otherland.place(x=460,y=250)
 
-    ety_otherland=ttk.Entry(win_setParam)
+    var_otherland=tk.DoubleVar()
+    ety_otherland=ttk.Entry(win_setParam,textvariable=var_otherland)
     ety_otherland.place(x=560,y=251)
 
     lb_otherlandCstraint=ttk.Label(win_setParam,text='(0-150)',font=('宋体', 12))
@@ -364,7 +392,8 @@ def setParam():
     lb_kzl=ttk.Label(win_setParam,text='空置率:',font=('宋体', 12))
     lb_kzl.place(x=80,y=380)
 
-    ety_kzl=ttk.Entry(win_setParam)
+    var_kzl=tk.DoubleVar()
+    ety_kzl=ttk.Entry(win_setParam,textvariable=var_kzl)
     ety_kzl.place(x=220,y=380)
 
     lb_kzlCstraint=ttk.Label(win_setParam,text='(0-1)',font=('宋体', 12))
@@ -374,14 +403,16 @@ def setParam():
     lb_predtyearpop=ttk.Label(win_setParam,text='未来年总人口:',font=('宋体', 12))
     lb_predtyearpop.place(x=80,y=430)
 
-    ety_predtyearpop=ttk.Entry(win_setParam)
+    var_pdypop=tk.DoubleVar()
+    ety_predtyearpop=ttk.Entry(win_setParam,textvariable=var_pdypop)
     ety_predtyearpop.place(x=220,y=430)
 
     # 预测年总就业
     lb_predtyearemp=ttk.Label(win_setParam,text='未来年总就业:',font=('宋体', 12))
     lb_predtyearemp.place(x=80,y=480)
 
-    ety_predtyearemp=ttk.Entry(win_setParam)
+    var_pdyemp=tk.DoubleVar()
+    ety_predtyearemp=ttk.Entry(win_setParam,textvariable=var_pdyemp)
     ety_predtyearemp.place(x=220,y=480)
 
 
@@ -398,6 +429,8 @@ def setParam():
     #确定按钮
     btn_confsetParam=ttk.Button(win_setParam,text='设置完成',command=setParamDone)
     btn_confsetParam.place(x=470,y=590)
+
+
 
 def dataCollect():
     pass
