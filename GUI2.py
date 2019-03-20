@@ -80,8 +80,11 @@ def read_data():
     #保存基准年人口就业输出数据
     def save_byrkjyoutput():
         try:
-            file_byrkjyoutput=filedialog.asksaveasfilename(title='存放基准年人口就业数据',filetypes=[('Excel', '*.xlsx '), ('All Files', '*')])
-            var_byrkjyoutput.set(str(file_byrkjyoutput)+'.xlsx')
+            file_byrkjyoutput=filedialog.asksaveasfilename(title='存放基准年人口就业数据', defaultextension='.txt',
+                                                           filetypes=[('Excel', '*.xlsx '), ('All Files', '*')])
+            # 这里如果不加defaulttextension,则保存的文件名没有后缀名。
+
+            var_byrkjyoutput.set(str(file_byrkjyoutput))
             # print(var_byrkjyinput.get())
 
             #定义文件存放路径
@@ -89,6 +92,7 @@ def read_data():
 
             #获取人口就业输入框路径
             read_path=str(var_byrkjyinput.get())
+            #读取excel表格中Sheet1内数据
             df_byrkjyinput = pd.read_excel(read_path,'Sheet1')
             df_afterres = dataClean(df_byrkjyinput)
 
@@ -143,8 +147,9 @@ def read_data():
 
     def save_byjzmjoutput():
         try:
-            file_byjzmjoutput=filedialog.asksaveasfilename(title='存放基准年建筑面积数据',filetypes=[('Excel','*.xlsx'),('All Files','*')])
-            var_byjzmjoutput.set(str(file_byjzmjoutput)+'.xlsx')
+            file_byjzmjoutput=filedialog.asksaveasfilename(title='存放基准年建筑面积数据', defaultextension='.xlsx',
+                                                           filetypes=[('Excel','*.xlsx'),('All Files','*')])
+            var_byjzmjoutput.set(str(file_byjzmjoutput))
 
             save_path=str(var_byjzmjoutput.get())
 
@@ -177,10 +182,10 @@ def read_data():
 # '--------------------------------------------------'
 
     #设置未来年建筑面积与人口就业数据
-    lb_predtyear=ttk.Label(win_rddata,text='未来年数据处理',font=('微软雅黑', 16))
+    lb_predtyear=ttk.Label(win_rddata,text='规划年数据处理',font=('微软雅黑', 16))
     lb_predtyear.place(x=100,y=350)
     #未来年建筑面积标签
-    lb_pdyjzmj=ttk.Label(win_rddata,text='未来年分类建筑面积数据 :', font=('微软雅黑', 13 ))
+    lb_pdyjzmj=ttk.Label(win_rddata,text='规划年分类建筑面积数据 :', font=('微软雅黑', 13 ))
     lb_pdyjzmj.place(x=100,y=400)
 
     lb_pdyjzmjinput=ttk.Label(win_rddata,text='输入文件位置：',font=('宋体', 12))
@@ -198,14 +203,15 @@ def read_data():
     ety_pdyjzmjoutput.place(x=320,y=485)
 
     def open_pdyjzmjinput():
-        file_pdyjzmjinput=filedialog.askopenfilename(title='打开预测年建筑面积',filetypes=[('Excel','*.xlsx'),('All Files','*')])
+        file_pdyjzmjinput=filedialog.askopenfilename(title='打开规划年建筑面积',filetypes=[('Excel','*.xlsx'),('All Files','*')])
         var_pdyjzmjinput.set(str(file_pdyjzmjinput))
 
     def save_pdyjzmjoutput():
         try:
-            file_pdyjzmjoutput = filedialog.asksaveasfilename(title='存放基准年建筑面积数据',filetypes=[('Excel', '*.xlsx'), ('All Files', '*')])
+            file_pdyjzmjoutput = filedialog.asksaveasfilename(title='存放基准年建筑面积数据',defaultextension='.xlsx',
+                                                              filetypes=[('Excel', '*.xlsx'), ('All Files', '*')])
 
-            var_pdyjzmjoutput.set(str(file_pdyjzmjoutput)+'.xlsx')
+            var_pdyjzmjoutput.set(str(file_pdyjzmjoutput))
             #这里对有无后缀进行判断
             save_path = str(var_pdyjzmjoutput.get())
 
@@ -230,7 +236,7 @@ def read_data():
     btn_pdyjzmjoutput.place(x=540,y=485)
 
     #未来年交通小区可达性
-    lb_predtyearkdx=ttk.Label(win_rddata,text='未来年交通小区可达性数据：',font=('微软雅黑', 12 ))
+    lb_predtyearkdx=ttk.Label(win_rddata,text='规划年交通小区可达性数据：',font=('微软雅黑', 13))
     lb_predtyearkdx.place(x=100,y=520)
 
     lb_pdykdx=ttk.Label(win_rddata,text='输入文件位置: ',font=('宋体', 12))
@@ -262,10 +268,9 @@ def read_data():
         win_rddata.destroy()
 
     def confReaddata():
-        testfile=getkdx()
-        print(testfile)
-
         tk.messagebox.showinfo(title='',message='数据清洗完成！')
+        win_rddata.destroy()
+
     btn_cancelReaddata=ttk.Button(win_rddata,text='取消',command=cancelReaddata)
     btn_cancelReaddata.place(x=260,y=640)
 
@@ -281,6 +286,7 @@ global pdyemp
 #为空间消费系数定义一个list
 global list_SCR
 list_SCR=[]
+
 def setParam():
     win_setParam = tk.Toplevel(app)
     win_setParam.title("设置相关参数")
@@ -296,6 +302,7 @@ def setParam():
     lb_resident.place(x=70,y=130)
 
     #空间消费系数应为double型
+
     var_resident=tk.DoubleVar()
     ety_resident=ttk.Entry(win_setParam,textvariable=var_resident)
     ety_resident.place(x=160,y=130)
@@ -400,7 +407,7 @@ def setParam():
     lb_kzlCstraint.place(x=410,y=380)
 
     #预测年总人口
-    lb_predtyearpop=ttk.Label(win_setParam,text='未来年总人口:',font=('宋体', 12))
+    lb_predtyearpop=ttk.Label(win_setParam,text='规划年总人口:',font=('宋体', 12))
     lb_predtyearpop.place(x=80,y=430)
 
     var_pdypop=tk.DoubleVar()
@@ -408,7 +415,7 @@ def setParam():
     ety_predtyearpop.place(x=220,y=430)
 
     # 预测年总就业
-    lb_predtyearemp=ttk.Label(win_setParam,text='未来年总就业:',font=('宋体', 12))
+    lb_predtyearemp=ttk.Label(win_setParam,text='规划年总就业:',font=('宋体', 12))
     lb_predtyearemp.place(x=80,y=480)
 
     var_pdyemp=tk.DoubleVar()
@@ -433,10 +440,87 @@ def setParam():
 
 
 def dataCollect():
-    pass
+    win_dataCollect=tk.Toplevel(app)
+    win_dataCollect.title('数据整合')
+    win_dataCollect.minsize(900,700)
+    win_dataCollect.maxsize(900,800)
+
+
+    lb_dataCollect=ttk.Label(win_dataCollect,text='处理后的数据选择', font=('微软雅黑', 15))
+    lb_dataCollect.place(x=50,y=90)
+
+    #读取清洗后的基准年小区人口岗位数据
+    def open_byrkgw_afdc():
+        file_byrkgw_afdc=filedialog.askopenfilename(title='打开基准年处理后的人口岗位数据',filetypes=[('Excel', '*.xlsx'), ('All Files', '*')])
+        var_byrkgw_afdc.set(str(file_byrkgw_afdc))
+
+    #处理后的基准年小区人口岗位数据
+    lb_byrkgw_afdc=ttk.Label(win_dataCollect,text='基准年小区人口岗位数据',font=('宋体', 12))
+    lb_byrkgw_afdc.place(x=80,y=150)
+
+    var_byrkgw_afdc=tk.StringVar()
+    ety_byrkgw_afdc=ttk.Entry(win_dataCollect,textvariable=var_byrkgw_afdc)
+    ety_byrkgw_afdc.place(x=350,y=150)
+
+    btn_byrkgw_afdc=ttk.Button(win_dataCollect,text='选择',command=open_byrkgw_afdc)
+    btn_byrkgw_afdc.place(x=600,y=150)
+
+    #处理后的规划年小区建筑面积数据
+    def open_pdyjzmj_afdc():
+        file_pdyjzmj_afdc=filedialog.askopenfilename(title='打开基准年处理后的建筑面积数据',filetypes=[('Excel', '*.xlsx'), ('All Files', '*')])
+        var_pdyjzmj_afdc.set(str(file_pdyjzmj_afdc))
+
+    lb_pdyjzmj_afdc=ttk.Label(win_dataCollect,text='规划年小区建筑面积数据',font=('宋体', 12))
+    lb_pdyjzmj_afdc.place(x=80,y=210)
+
+    var_pdyjzmj_afdc=tk.StringVar()
+    ety_pdyjzmj_afdc=ttk.Entry(win_dataCollect,textvariable=var_pdyjzmj_afdc)
+    ety_pdyjzmj_afdc.place(x=350,y=210)
+
+    btn_pdyjzmj_afdcselct=ttk.Button(win_dataCollect,text='选择',command=open_pdyjzmj_afdc)
+    btn_pdyjzmj_afdcselct.place(x=600,y=210)
+
+    #数据整合后存放位置
+    def open_afdataCollect():
+        file_afdataCollect=filedialog.askopenfilename(title='打开数据整合后存放位置',filetypes=[('Excel', '*.xlsx'), ('All Files', '*')])
+        var_afdataCollect.set(str(file_afdataCollect))
+
+    lb_afdataCollect=ttk.Label(win_dataCollect,text='数据整合后存放位置',font=('宋体',14))
+    lb_afdataCollect.place(x=50,y=300)
+
+    var_afdataCollect=tk.StringVar()
+    ety_afdataCollect=ttk.Entry(win_dataCollect,textvariable=var_afdataCollect)
+    ety_afdataCollect.place(x=350,y=300)
+
+    btn_afdataCollect=ttk.Button(win_dataCollect,text='选择',command=open_afdataCollect)
+    btn_afdataCollect.place(x=600,y=300)
+
+
+    def cacle_datacollect():
+        win_dataCollect.destroy()
+
+    def confm_datacollect():
+        tk.messagebox.showinfo(title='确认',message='完成数据整合！')
+        win_dataCollect.destroy()
+    btn_cancel=ttk.Button(win_dataCollect,text='取消',command=cacle_datacollect)
+    btn_cancel.place(x=260,y=560)
+
+    btn_confm=ttk.Button(win_dataCollect,text='确定',command=confm_datacollect)
+    btn_confm.place(x=460,y=560)
+
+
+
+
+
+
+
+
 
 def CalcPopemp():
     pass
+
+
+
 btn_readData = ttk.Button(app, text='数据清洗、过滤',  command=read_data)
 btn_setParam=ttk.Button(app,text='设置参数',command=setParam)
 btn_dataCollect=ttk.Button(app,text='交通小区数据整合',command=dataCollect)
