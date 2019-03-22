@@ -5,6 +5,7 @@ from tkinter import ttk
 import tkinter.messagebox
 from tkinter import filedialog
 import pandas as pd
+import json
 
 
 class Application(Frame):
@@ -29,10 +30,20 @@ canvas.create_image(800, 400, image=photo)
 canvas.pack()
 entry = tk.Entry(app, insertbackground='blue', highlightthickness=2)
 
+# global dict_SCR
+
+# global var_residt
+# global var_residtEmp
+# global var_administ
+# global var_commercial
+# global var_edu
+# global var_industry
+# global var_commIndus
+# global var_otherland
 
 def read_data():
     win_rddata = tk.Toplevel(app)
-    win_rddata.title("读取数据")
+    win_rddata.title("数据处理")
     win_rddata.minsize(900, 700)
     win_rddata.maxsize(900, 800)
 
@@ -68,6 +79,7 @@ def read_data():
         except TypeError as e:
             tk.messagebox.showinfo(message='请选择正确的人口就业文件')
 
+
     #读取基准年人口就业输入数据
     global file_byrkjyinput
     global df_byrkjyinput
@@ -93,16 +105,21 @@ def read_data():
             #获取人口就业输入框路径
             read_path=str(var_byrkjyinput.get())
             #读取excel表格中Sheet1内数据
-            df_byrkjyinput = pd.read_excel(read_path,'Sheet1')
+            df_byrkjyinput = pd.read_excel(read_path)    #默认读第一个表
+
+            #进行数据处理
             df_afterres = dataClean(df_byrkjyinput)
 
             if  isinstance(df_afterres,pd.DataFrame):
                 df_afterres.to_excel(save_path,'Sheet1')
                 tk.messagebox.showinfo(message='done...')
+                var_byrkjyoutput.set(file_byrkjyoutput)
             else:
                 tk.messagebox.showinfo(message='请先选择基准年人口就业数据')
         except FileNotFoundError as e:
             print('未选择文件!')
+        except ValueError as e:
+            tk.messagebox.showinfo(message='表格文件中缺少Sheet1')
 
 
     #基准年人口就业
@@ -154,17 +171,21 @@ def read_data():
             save_path=str(var_byjzmjoutput.get())
 
             read_path=str(var_byjzmjinput.get())
-            df_byjzmjinput = pd.read_excel(read_path, 'Sheet1')
+            #读取表格进行数据处理
+            df_byjzmjinput = pd.read_excel(read_path)
             df_afterres = dataClean(df_byjzmjinput)
 
             if isinstance(df_afterres, pd.DataFrame):
                 df_afterres.to_excel(save_path, 'Sheet1')
                 tk.messagebox.showinfo(message='done...')
+                var_byjzmjoutput.set(str(file_byjzmjoutput))
             else:
                 tk.messagebox.showinfo(message='请先选择基准年建筑面积数据')
 
         except FileNotFoundError as e:
             print('未选择文件!')
+        except ValueError as e:
+            print('表格文件中缺少Sheet1')
 
     btn_byjzmjinput=ttk.Button(win_rddata, text='选择',command=open_byjzmjinput)
     btn_byjzmjinput.place(x=540, y=255 )
@@ -208,7 +229,7 @@ def read_data():
 
     def save_pdyjzmjoutput():
         try:
-            file_pdyjzmjoutput = filedialog.asksaveasfilename(title='存放基准年建筑面积数据',defaultextension='.xlsx',
+            file_pdyjzmjoutput = filedialog.asksaveasfilename(title='存放规划年建筑面积数据',defaultextension='.xlsx',
                                                               filetypes=[('Excel', '*.xlsx'), ('All Files', '*')])
 
             var_pdyjzmjoutput.set(str(file_pdyjzmjoutput))
@@ -216,17 +237,21 @@ def read_data():
             save_path = str(var_pdyjzmjoutput.get())
 
             read_path = str(var_pdyjzmjinput.get())
-            df_pdyjzmjinput = pd.read_excel(read_path, 'Sheet1')
+            df_pdyjzmjinput = pd.read_excel(read_path)
             df_afterres = dataClean(df_pdyjzmjinput)
 
             if isinstance(df_afterres, pd.DataFrame):
-                df_afterres.to_excel(save_path, 'Sheet1')
+                #默认读取第一个表格
+                df_afterres.to_excel(save_path,)
                 tk.messagebox.showinfo(message='done...')
             else:
-                tk.messagebox.showinfo(message='请先选择基准年建筑面积数据')
+                tk.messagebox.showinfo(message='请先选择规划年建筑面积数据')
 
         except FileNotFoundError as e:
             print('未选择文件!')
+        except ValueError as e:
+            tk.messagebox.showinfo(message='表格文件中缺少Sheet1')
+
 
     #选择
     btn_pdyjzmjinput=ttk.Button(win_rddata,text='选择',command=open_pdyjzmjinput)
@@ -258,12 +283,12 @@ def read_data():
     btn_pdykdx=ttk.Button(win_rddata,text='选择',command=open_pdykdx)
     btn_pdykdx.place(x=540,y=565)
 
-    #function
+    #读取可达性文件
     def getkdx():
         kdxfilename=var_pdykdx.get()
         if kdxfilename is not None:
             df_pdykdx=pd.read_excel(str(kdxfilename))
-            print(df_pdykdx)
+
     def cancelReaddata():
         win_rddata.destroy()
 
@@ -284,8 +309,8 @@ global pdypop
 global pdyemp
 
 #为空间消费系数定义一个list
-global list_SCR
-list_SCR=[]
+
+
 
 def setParam():
     win_setParam = tk.Toplevel(app)
@@ -303,8 +328,8 @@ def setParam():
 
     #空间消费系数应为double型
 
-    var_resident=tk.DoubleVar()
-    ety_resident=ttk.Entry(win_setParam,textvariable=var_resident)
+    var_residt=tk.StringVar()
+    ety_resident=ttk.Entry(win_setParam,textvariable=var_residt)
     ety_resident.place(x=160,y=130)
     # 范围
     lb_residentCstraint=ttk.Label(win_setParam,text='(0-150)',font=('宋体', 12))
@@ -314,7 +339,7 @@ def setParam():
     lb_residtEmp=ttk.Label(win_setParam,text='居住岗位',font=('宋体', 12))
     lb_residtEmp.place(x=70,y=170)
 
-    var_residtEmp=tk.DoubleVar()
+    var_residtEmp=tk.StringVar()
     ety_residtEmp=ttk.Entry(win_setParam,textvariable=var_residtEmp)
     ety_residtEmp.place(x=160,y=170)
     #范围
@@ -325,7 +350,7 @@ def setParam():
     lb_administ=ttk.Label(win_setParam,text='行政办公',font=('宋体', 12))
     lb_administ.place(x=70,y=210)
 
-    var_administ=tk.DoubleVar()
+    var_administ=tk.StringVar()
     ety_administ=ttk.Entry(win_setParam,textvariable=var_administ)
     ety_administ.place(x=160,y=210)
 
@@ -336,7 +361,7 @@ def setParam():
     lb_commercial=ttk.Label(win_setParam,text='商业金融',font=('宋体', 12))
     lb_commercial.place(x=70,y=250)
 
-    var_commercial=tk.DoubleVar()
+    var_commercial=tk.StringVar()
     ety_commercial=ttk.Entry(win_setParam,textvariable=var_commercial)
     ety_commercial.place(x=160,y=250)
 
@@ -347,7 +372,7 @@ def setParam():
     lb_edu=ttk.Label(win_setParam,text='教育科研',font=('宋体', 12))
     lb_edu.place(x=460,y=130)
 
-    var_edu=tk.DoubleVar()
+    var_edu=tk.StringVar()
     ety_edu=ttk.Entry(win_setParam,textvariable=var_edu)
     ety_edu.place(x=560,y=130)
 
@@ -358,7 +383,7 @@ def setParam():
     lb_industry=ttk.Label(win_setParam,text='工业仓储',font=('宋体', 12))
     lb_industry.place(x=460,y=170)
 
-    var_industry=tk.DoubleVar()
+    var_industry=tk.StringVar()
     ety_industry=ttk.Entry(win_setParam,textvariable=var_industry)
     ety_industry.place(x=560,y=170)
 
@@ -369,18 +394,18 @@ def setParam():
     lb_commIndus=ttk.Label(win_setParam,text='其他公建',font=('宋体', 12))
     lb_commIndus.place(x=460,y=210)
 
-    var_commindus=tk.DoubleVar()
-    ety_commIndus=ttk.Entry(win_setParam,textvariable=var_commindus)
+    var_commIndus=tk.StringVar()
+    ety_commIndus=ttk.Entry(win_setParam,textvariable=var_commIndus)
     ety_commIndus.place(x=560,y=210)
 
     lb_commIndusCstraint=ttk.Label(win_setParam,text='(0-150)',font=('宋体', 12))
     lb_commIndusCstraint.place(x=760,y=210)
 
-    #其他用地
+    #其他用地建筑
     lb_otherland=ttk.Label(win_setParam,text='其他用地',font=('宋体', 12))
     lb_otherland.place(x=460,y=250)
 
-    var_otherland=tk.DoubleVar()
+    var_otherland=tk.StringVar()
     ety_otherland=ttk.Entry(win_setParam,textvariable=var_otherland)
     ety_otherland.place(x=560,y=251)
 
@@ -410,7 +435,7 @@ def setParam():
     lb_predtyearpop=ttk.Label(win_setParam,text='规划年总人口:',font=('宋体', 12))
     lb_predtyearpop.place(x=80,y=430)
 
-    var_pdypop=tk.DoubleVar()
+    var_pdypop=tk.StringVar()
     ety_predtyearpop=ttk.Entry(win_setParam,textvariable=var_pdypop)
     ety_predtyearpop.place(x=220,y=430)
 
@@ -418,15 +443,52 @@ def setParam():
     lb_predtyearemp=ttk.Label(win_setParam,text='规划年总就业:',font=('宋体', 12))
     lb_predtyearemp.place(x=80,y=480)
 
-    var_pdyemp=tk.DoubleVar()
+    var_pdyemp=tk.StringVar()
     ety_predtyearemp=ttk.Entry(win_setParam,textvariable=var_pdyemp)
     ety_predtyearemp.place(x=220,y=480)
-
 
     #此函数用来将读取的参数应用到excel中
     def setParamDone():
         tk.messagebox.showinfo(title='ok',message='参数设置完成！')
+        # c=(var_kzl.get())
+        # print(c,type(c))
+        # if c<0:
+        #     tk.messagebox.showinfo(message='no')
+
+        # d=int(var_residt.get())
+        # print(d,type(d))
+        # if d<0:
+        #     tk.messagebox.showinfo(message='不能小于0  ')
+
+
+        if var_kzl.get()<0:
+            tk.messagebox.showinfo(messagae='空置率不能小于0 ！')
+        elif var_kzl.get()>1:
+            tk.messagebox.showinfo(message='空置率不能大于1 ！')
+        else:
+            try:
+                dict_SCR = {'居住': int(var_residt.get()), '居住岗位': int(var_residtEmp.get()), '行政办公': int(var_administ.get()),
+                            '商业金融': int(var_commercial.get()), '教育科研': int(var_edu.get()),
+                            '工业仓储': int(var_industry.get()), '其他公建': int(var_commIndus.get()),
+                            '其他用地建筑': int(var_otherland.get()),'空置率': var_kzl.get(),
+                            '规划年总人口': int(var_pdypop.get()), '规划年总就业': int(var_pdyemp.get())}
+                print(dict_SCR)
+            except ValueError as e:
+                tk.messagebox.showinfo(message='请填完所有参数！ ')
+
+        for k,v in dict_SCR.items():
+            if v<0:
+                tk.messagebox.showinfo(message='空间消费系数-%s'%k+'不能小于0 !')
+            else:
+                # 将参数写入json
+                jsonobj = json.dumps(dict_SCR, ensure_ascii=False)
+                with open('Param.json', 'w', encoding='utf-8') as f:
+                    f.write(jsonobj)
+
+
+
         win_setParam.destroy()
+
     def cancelsetParam():
         win_setParam.destroy()
 
@@ -439,13 +501,14 @@ def setParam():
 
 
 
+
 def dataCollect():
     win_dataCollect=tk.Toplevel(app)
     win_dataCollect.title('数据整合')
     win_dataCollect.minsize(900,700)
     win_dataCollect.maxsize(900,800)
 
-
+    # print(dict_SCR)
     lb_dataCollect=ttk.Label(win_dataCollect,text='处理后的数据选择', font=('微软雅黑', 15))
     lb_dataCollect.place(x=50,y=90)
 
@@ -482,7 +545,8 @@ def dataCollect():
 
     #数据整合后存放位置
     def open_afdataCollect():
-        file_afdataCollect=filedialog.askopenfilename(title='打开数据整合后存放位置',filetypes=[('Excel', '*.xlsx'), ('All Files', '*')])
+        file_afdataCollect=filedialog.asksaveasfilename(title='打开数据整合后存放位置',defaultextension='.xlsx',
+                                                        filetypes=[('Excel', '*.xlsx'), ('All Files', '*')])
         var_afdataCollect.set(str(file_afdataCollect))
 
     lb_afdataCollect=ttk.Label(win_dataCollect,text='数据整合后存放位置',font=('宋体',14))
