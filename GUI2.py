@@ -449,17 +449,9 @@ def setParam():
 
     #此函数用来将读取的参数应用到excel中
     def setParamDone():
+        # global dict_SCR
+        # dict_SCR={}     #定义一个空的dict
         tk.messagebox.showinfo(title='ok',message='参数设置完成！')
-        # c=(var_kzl.get())
-        # print(c,type(c))
-        # if c<0:
-        #     tk.messagebox.showinfo(message='no')
-
-        # d=int(var_residt.get())
-        # print(d,type(d))
-        # if d<0:
-        #     tk.messagebox.showinfo(message='不能小于0  ')
-
 
         if var_kzl.get()<0:
             tk.messagebox.showinfo(messagae='空置率不能小于0 ！')
@@ -474,7 +466,7 @@ def setParam():
                             '规划年总人口': int(var_pdypop.get()), '规划年总就业': int(var_pdyemp.get())}
                 print(dict_SCR)
             except ValueError as e:
-                tk.messagebox.showinfo(message='请填完所有参数！ ')
+                tk.messagebox.showinfo(message='请填完所有参数，参数必须是整数！ ')
 
         for k,v in dict_SCR.items():
             if v<0:
@@ -564,6 +556,7 @@ def dataCollect():
         win_dataCollect.destroy()
 
     def confm_datacollect():
+
         tk.messagebox.showinfo(title='确认',message='完成数据整合！')
         win_dataCollect.destroy()
     btn_cancel=ttk.Button(win_dataCollect,text='取消',command=cacle_datacollect)
@@ -579,7 +572,7 @@ def dataCollect():
 
 
 
-
+#计算交通小区人口岗位
 def CalcPopemp():
     pass
 
