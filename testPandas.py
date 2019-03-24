@@ -1,5 +1,7 @@
 import pandas as pd
 import json
+from tkinter import messagebox
+import tkinter as tk
 
 '''
 数据处理（清洗与过滤）
@@ -35,14 +37,34 @@ for each in columnList:
 df2=df1
 df2.columns=['小区编号','居住','居住岗位','行政办公','商业金融','教育科研','工业仓储','其他公建','其他用地建筑']
 # print(df2)
-print(df2)
-# for each in columnList:
-#     if each=="小区编号":
-#         print('xqbh')
-#     else:
-#         df2[each]=df2[each]*SCR[each]
 # print(df2)
-# df2.to_excel('C:/Users/lenovo/Desktop/软件所需数据/2008建筑数据.xlsx','Sheet1')
+for each in columnList:
+    if each=="小区编号":
+        print('xqbh')
+    else:
+        df2[each]=df2[each]*SCR[each]
+# print(df2)
+#存放基准年建筑面积数据
+# df2.to_excel('C:/Users/lenovo/Desktop/软件所需数据/2008建筑数据.xlsx','建筑面积')
+
+
+df_pdyjzmj=pd.read_excel('C:/Users/lenovo/Desktop/软件所需数据/2013建筑面积.xlsx')
+print(df_pdyjzmj)
+df3=df_pdyjzmj
+try:
+    for each in columnList:
+        if each=="小区编号":
+            print('ok')
+        else:
+            df3[each]=df_pdyjzmj[each]-df2[each]
+
+except KeyError as e:
+    tk.messagebox.showinfo(message='请把表标题按空间系数顺序排列！')
+
+
+# df_jzmjzj=df_pdyjzmj-df2
+# print(df_jzmjzj,type(df_pdyjzmj))
+
 
 # df2['居住面积']
 # c =df2['居住面积']*SCR['居住']
