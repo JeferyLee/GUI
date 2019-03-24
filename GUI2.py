@@ -465,19 +465,16 @@ def setParam():
                             '其他用地建筑': int(var_otherland.get()),'空置率': var_kzl.get(),
                             '规划年总人口': int(var_pdypop.get()), '规划年总就业': int(var_pdyemp.get())}
                 print(dict_SCR)
+                for k, v in dict_SCR.items():
+                    if v < 0:
+                        tk.messagebox.showinfo(message='空间消费系数-%s' % k + '不能小于0 !')
+                    else:
+                        # 将参数写入json
+                        jsonobj = json.dumps(dict_SCR, ensure_ascii=False)
+                        with open('Param.json', 'w', encoding='utf-8') as f:
+                            f.write(jsonobj)
             except ValueError as e:
                 tk.messagebox.showinfo(message='请填完所有参数，参数必须是整数！ ')
-
-        for k,v in dict_SCR.items():
-            if v<0:
-                tk.messagebox.showinfo(message='空间消费系数-%s'%k+'不能小于0 !')
-            else:
-                # 将参数写入json
-                jsonobj = json.dumps(dict_SCR, ensure_ascii=False)
-                with open('Param.json', 'w', encoding='utf-8') as f:
-                    f.write(jsonobj)
-
-
 
         win_setParam.destroy()
 
@@ -535,27 +532,82 @@ def dataCollect():
     btn_pdyjzmj_afdcselct=ttk.Button(win_dataCollect,text='选择',command=open_pdyjzmj_afdc)
     btn_pdyjzmj_afdcselct.place(x=600,y=210)
 
+    #交通小区可达性数据
+
+    def open_kdxafdc():
+        file_kdxafdc=filedialog.askopenfilename(title='打开处理后的交通小区可达性数据',filetypes=[('Excel','*.xlsx'),('All Files','*')])
+        var_kdx_afdc.set(str(file_kdxafdc))
+    lb_kdx_afdc=ttk.Label(win_dataCollect,text='交通小区可达性数据',font=('宋体',12))
+    lb_kdx_afdc.place(x=80,y=270)
+
+    var_kdx_afdc=tk.StringVar()
+    ety_kdx_afdc=ttk.Entry(win_dataCollect,textvariable=var_kdx_afdc)
+    ety_kdx_afdc.place(x=350,y=270)
+
+
+    btn_kdx_afdc=ttk.Button(win_dataCollect,text='选择',command=open_kdxafdc)
+    btn_kdx_afdc.place(x=600,y=270)
+
+
+
+
+
     #数据整合后存放位置
     def open_afdataCollect():
         file_afdataCollect=filedialog.asksaveasfilename(title='打开数据整合后存放位置',defaultextension='.xlsx',
                                                         filetypes=[('Excel', '*.xlsx'), ('All Files', '*')])
         var_afdataCollect.set(str(file_afdataCollect))
 
-    lb_afdataCollect=ttk.Label(win_dataCollect,text='数据整合后存放位置',font=('宋体',14))
-    lb_afdataCollect.place(x=50,y=300)
+    lb_afdataCollect=ttk.Label(win_dataCollect,text='数据整合后存放位置',font=('微软雅黑',14))
+    lb_afdataCollect.place(x=50,y=350)
 
     var_afdataCollect=tk.StringVar()
     ety_afdataCollect=ttk.Entry(win_dataCollect,textvariable=var_afdataCollect)
-    ety_afdataCollect.place(x=350,y=300)
+    ety_afdataCollect.place(x=350,y=350)
 
     btn_afdataCollect=ttk.Button(win_dataCollect,text='选择',command=open_afdataCollect)
-    btn_afdataCollect.place(x=600,y=300)
+    btn_afdataCollect.place(x=600,y=350)
 
 
     def cacle_datacollect():
         win_dataCollect.destroy()
 
     def confm_datacollect():
+        try:
+            #读取在窗口二中设置的空间消费系数
+            with open('Param.json', 'r', encoding='utf-8') as f:
+                SCR = json.load(f)
+                print(SCR)
+                # print(SCR['居住'], type(SCR['居住']))
+        except FileNotFoundError as e:
+            tk.messagebox.showinfo(message='请先设置相关参数！')
+
+        try:
+            df_byrkgw=pd.read_excel(str(var_byrkgw_afdc.get()))
+
+            df_pdyjzmj = pd.read_excel(str(var_pdyjzmj_afdc.get()))
+
+            df_kdxafdc = pd.read_excel(str(var_kdx_afdc.get()))
+
+            columnList = ['小区编号', '居住', '居住岗位', '行政办公', '商业金融', '教育科研', '工业仓储', '其他公建', '其他用地建筑']
+
+            df_temp= df_byrkgw
+            df_temp.columns = ['小区编号', '居住', '居住岗位', '行政办公', '商业金融', '教育科研', '工业仓储', '其他公建', '其他用地建筑']
+            # print(df2)
+            for each in columnList:
+                if each == "小区编号":
+                    print('xqbh')
+                else:
+                    #计算基准年建筑面积数据
+                    df_temp[each] = df_temp[each] * SCR[each]
+            writer=pd.ExcelWriter(var_afdataCollect.get())
+
+            df_temp.to_excel(writer, '基准年建筑面积')
+            df_pdyjzmj.to_excel(writer, '规划年建筑面积')
+            df_kdxafdc.to_excel(writer, '可达性')
+
+        except FileNotFoundError as e:
+            tk.messagebox.showinfo(message='请先选择文件！')
 
         tk.messagebox.showinfo(title='确认',message='完成数据整合！')
         win_dataCollect.destroy()
@@ -567,14 +619,28 @@ def dataCollect():
 
 
 
-
-
-
-
-
 #计算交通小区人口岗位
 def CalcPopemp():
-    pass
+    win_calcpe=tk.Toplevel(app)
+    win_calcpe.title('计算人口岗位')
+    win_calcpe.minsize(900,700)
+    win_calcpe.maxsize(900,800)
+
+    #选择数据整合后的文件
+
+    def open_file_afdc():
+        file_afdc=filedialog.askopenfilename(title='打开数据整合后的文件',filetypes=[('Excel', '*.xlsx'), ('All Files', '*')])
+        var_file_afdc.set(str(file_afdc))
+
+    lb_file_afdc=ttk.Label(win_calcpe,text='整合后的数据文件:',font=('宋体',12))
+    lb_file_afdc.place(x=90,y=90)
+
+    var_file_afdc=tk.Stringvar()
+    ety_file_afdc=ttk.Entry(win_calcpe,textvarialbe=var_file_afdc)
+    ety_file_afdc.place(x=340,y=90)
+
+    btn_file_afdc=ttk.Button(win_calcpe,text='选择',command=open_file_afdc)
+    btn_file_afdc.place(x=550,y=90)
 
 
 
