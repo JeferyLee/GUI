@@ -590,8 +590,12 @@ def dataCollect():
             df_kdxafdc = pd.read_excel(str(var_kdx_afdc.get()))
 
             columnList = ['小区编号', '居住', '居住岗位', '行政办公', '商业金融', '教育科研', '工业仓储', '其他公建', '其他用地建筑']
-
+            print(df_byrkgw)
             df_temp= df_byrkgw
+            print(df_byrkgw)
+            writer = pd.ExcelWriter(var_afdataCollect.get())
+            df_byrkgw.to_excel(writer, '基准年人口岗位')
+
             df_temp.columns = ['小区编号', '居住', '居住岗位', '行政办公', '商业金融', '教育科研', '工业仓储', '其他公建', '其他用地建筑']
             # print(df2)
             for each in columnList:
@@ -600,11 +604,12 @@ def dataCollect():
                 else:
                     #计算基准年建筑面积数据
                     df_temp[each] = df_temp[each] * SCR[each]
-            writer=pd.ExcelWriter(var_afdataCollect.get())
 
             df_temp.to_excel(writer, '基准年建筑面积')
             df_pdyjzmj.to_excel(writer, '规划年建筑面积')
             df_kdxafdc.to_excel(writer, '可达性')
+
+
 
         except FileNotFoundError as e:
             tk.messagebox.showinfo(message='请先选择文件！')
@@ -635,12 +640,69 @@ def CalcPopemp():
     lb_file_afdc=ttk.Label(win_calcpe,text='整合后的数据文件:',font=('宋体',12))
     lb_file_afdc.place(x=90,y=90)
 
-    var_file_afdc=tk.Stringvar()
-    ety_file_afdc=ttk.Entry(win_calcpe,textvarialbe=var_file_afdc)
-    ety_file_afdc.place(x=340,y=90)
+    var_file_afdc=tk.StringVar()
+    ety_file_afdc=ttk.Entry(win_calcpe,textvariable=var_file_afdc)
+    ety_file_afdc.place(x=390,y=90)
 
     btn_file_afdc=ttk.Button(win_calcpe,text='选择',command=open_file_afdc)
-    btn_file_afdc.place(x=550,y=90)
+    btn_file_afdc.place(x=620,y=90)
+
+    #交通小区人口岗位计算保存
+
+    def save_rkgw_afclc():
+        file_rkgw_afclc=filedialog.asksaveasfilename(title='交通小区人口岗位计算保存',defaultextension='.xlsx',
+                                                        filetypes=[('Excel', '*.xlsx'), ('All Files', '*')])
+        var_rkgw_afclc.set(str(file_rkgw_afclc))
+
+
+    lb_rkgw_afcalc=ttk.Label(win_calcpe,text='交通小区人口岗位计算结果保存:',font=('宋体',12))
+    lb_rkgw_afcalc.place(x=90,y=150)
+
+    var_rkgw_afclc=tk.StringVar()
+    ety_rkgw_afcalc=ttk.Entry(win_calcpe,textvariable=var_rkgw_afclc)
+    ety_rkgw_afcalc.place(x=390,y=150)
+
+    btn_rkgw_afclc=ttk. Button(win_calcpe,text='选择',command=save_rkgw_afclc)
+    btn_rkgw_afclc.place(x=620,y=150)
+
+    def calcpe():
+        pass
+    btn_calcpe=tk.Button(win_calcpe,text='计算人口岗位',width=12,height=2,bg='#E6E6E6',fg='black',command=calcpe)
+
+    # btn_calcpe=ttk.Button(win_calcpe ,text='计算位')
+    btn_calcpe.place(x=620,y=220)
+
+    #添加画布
+    cav_rddata = tk.Canvas(win_calcpe, width=800, height=10, relief=RAISED)
+    cav_rddata.place(x=0, y=290)
+    cav_rddata.create_line(50, 10, 800, 10, fill='black')
+
+    lb_rkgw_query=ttk.Label(win_calcpe,text='查询交通小区人口岗位',font=('微软雅黑',14))
+    lb_rkgw_query.place(x=90,y=350)
+
+    lb_rkgw_search=ttk.Label(win_calcpe,text='输入交通小区编号',font=('宋体',12))
+    lb_rkgw_search.place(x=130,y=420)
+
+    var_rkgw_search=tk.StringVar()
+    ety_rkgw_search=ttk.Entry(win_calcpe,textvariable=var_rkgw_search)
+    ety_rkgw_search.place(x=390,y=420)
+
+    lb_query=ttk.Button(win_calcpe,text='查询')
+    lb_query.place(x=620,y=420)
+
+    lb_pop=ttk.Label(win_calcpe,text='小区人口:',font=('宋体',12))
+    lb_pop.place(x=160,y=510)
+
+    var_pop=tk.StringVar()
+    ety_pop=tk.Entry(win_calcpe,width=10 ,textvariable=var_pop)
+    ety_pop.place(x=270,y=510)
+
+    lb_emp=ttk.Label(win_calcpe,text='小区岗位:',font=('宋体',12))
+    lb_emp.place(x=420,y=510)
+
+    var_emp=tk.StringVar()
+    ety_emp=tk.Entry(win_calcpe,width=10,textvariable=var_emp)
+    ety_emp.place(x=530,y=510)
 
 
 
