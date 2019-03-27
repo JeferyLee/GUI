@@ -666,7 +666,163 @@ def CalcPopemp():
     btn_rkgw_afclc.place(x=620,y=150)
 
     def calcpe():
-        pass
+        print(var_file_afdc)
+        df_byrkgw = pd.read_excel(str(var_file_afdc.get()), '基准年人口岗位')
+        # print(df_byrkgw)
+        df_byjzmj = pd.read_excel(str(var_file_afdc.get()), '基准年建筑面积')
+        # print(df_byjzmj)
+        df_pdyjzmj = pd.read_excel(str(var_file_afdc.get()), '规划年建筑面积')
+        # print(df_pdyrkgw)
+
+        df_kdx = pd.read_excel(str(var_file_afdc.get()), '可达性')
+        # print(df_kdx)
+
+        # 计算基准年人口
+        # 计算每一列的人口岗位之和
+        sum_col = df_byrkgw.apply(sum)
+        byrk = sum_col[1]
+        s = 0
+        for i in range(2, 9):
+            s = s + sum_col[i]
+        # 计算基准年岗位
+        bygw = s
+
+        # 将基准年人口单独作为一个dataFrame,赋值编号
+        df_byrk = df_byrkgw.loc[:, ['xqrk']]
+        # print(df_byrk)
+        df_byrk.index = df_byjzmj['小区编号']
+        # print(df_byrk)
+
+        # 将基准年岗位作为一个dataFrame
+        df_temp = df_byrkgw.iloc[:, 2:9]
+        df_bygw = df_temp.copy()
+        # print(df_bygw.sum(axis=1))
+
+        df_bygw['gw_sum'] = 0
+
+        # 对每行进行求和
+        df_bygw.loc[:, 'gw_sum'] = df_bygw.apply(lambda x: x.sum(), axis=1)
+        # df_bygw['gw_sum']=df_bygw.sum(axis=1)
+        df_bygw.index = df_byjzmj['小区编号']
+        print(df_bygw)
+
+        # 计算规划年相比基准年人口岗位增量
+        with open('Param.json', 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
+        # print(data)
+        pdyrk = data['规划年总人口']
+        pdygw = data['规划年总就业']
+
+        # 计算人口增量
+        rkzl = pdyrk - byrk
+        gwzl = pdygw - bygw
+        print(rkzl, gwzl)
+
+        columnList = ['小区编号', '居住', '居住岗位', '行政办公', '商业金融', '教育科研', '工业仓储', '其他公建', '其他用地建筑']
+        df_jzmjzl = df_pdyjzmj
+        try:
+            for each in columnList:
+                if each == '小区编号':
+                    print('ok')
+                else:
+                    df_jzmjzl[each] = df_pdyjzmj[each] - df_byjzmj[each]
+        except KeyError as e:
+            print('表标题错误！')
+
+        # 将交通小区建筑面积增加量构建为一个dataFrame对象
+        df_jzmjzl.columns = columnList
+        # print(df_jzmjzl)
+
+        # 把小区中的居住建筑面积单独提出来，作为一个dataFrame对象
+        df_rkmj = df_jzmjzl.loc[:, ['小区编号', '居住']]
+
+        df_rkmj.index = df_pdyjzmj['小区编号']
+        # print(df_rk)
+
+        # 将可达性与居住建筑面积表合并起来
+        df_kdx.index = df_pdyjzmj['小区编号']
+        df_rkkdx1 = df_rkmj.join(df_kdx)
+        # print(df_rkkdx1)
+
+        # 计算分母
+        s_rkkdx = 0
+        for i in range(1101, 1166):
+            if df_rkkdx1.loc[i, '居住'] > 0:
+                s_rkkdx = s_rkkdx + data['空置率'] * df_rkkdx1.loc[i, '居住'] * df_rkkdx1.loc[i, '总可达性']
+
+        # 构建一个新的dataFrame对象,数值表示人口增量分配权重,
+        df_rk1 = df_rkkdx1
+        # print(df_rkkdx1)
+        for i in range(1101, 1166):
+            if df_rk1.loc[i, '居住'] > 0:
+                # 人口增量分配权重
+                rk_rate = data['空置率'] * df_rk1.loc[i, '居住'] * df_rk1.loc[i, '总可达性'] / s_rkkdx
+                df_rk1.loc[i, '居住'] = rk_rate
+            else:
+                df_rk1.loc[i, '居住'] = df_rk1.loc[i, '居住'] / data['居住']
+        # print(df_rk1)
+
+        for i in range(1101, 1166):
+            if df_rk1.loc[i, '居住'] > 0:
+                xqrkzl = rkzl * df_rk1.loc[i, '居住']
+                df_rk1.loc[i, '居住'] = xqrkzl
+        # print(df_rk1)
+        for i in range(1101, 1166):
+            df_rk1.loc[i, '居住'] = df_rk1.loc[i, '居住'] + df_byrk.loc[i, 'xqrk']
+
+        # print(df_rk1)
+
+        # 计算岗位
+        df_temp1 = df_jzmjzl
+        for each in columnList:
+            if each == '小区编号' or each == '居住':
+                print('ok')
+            else:
+                df_temp1[each] = df_jzmjzl[each] / data[each]
+
+        # 把岗位增量单独提出来赋值给df
+        df_gwzl = df_temp1.loc[:, ['居住岗位', '行政办公', '商业金融', '教育科研', '工业仓储', '其他公建', '其他用地建筑']]
+        # print(df_gwzl)
+        # 对就业岗位求和
+        df_gwzl['gw_sum'] = df_gwzl.apply(lambda x: x.sum(), axis=1)
+        df_gwzl.index = df_pdyjzmj['小区编号']
+        # print(df_gwzl)
+        df_gwkdx = df_gwzl.join(df_kdx)
+        # print(df_gwkdx)
+
+        # 对岗位增量与可达性之积进行求和
+        s_gwkdx = 0
+        for i in range(1101, 1166):
+            if df_gwkdx.loc[i, 'gw_sum'] > 0:
+                s_gwkdx = s_gwkdx + df_gwkdx.loc[i, 'gw_sum'] * df_gwkdx.loc[i, '总可达性']
+
+        # 求岗位增量权重
+        for i in range(1101, 1166):
+            if df_gwkdx.loc[i, 'gw_sum'] > 0:
+                gw_rate = df_gwkdx.loc[i, 'gw_sum'] * df_gwkdx.loc[i, '总可达性'] / s_gwkdx
+                df_gwkdx.loc[i, 'gw_sum'] = gw_rate
+        df_gwkdx1 = df_gwkdx.loc[:, ['gw_sum']]
+        # print(df_gwkdx1)
+
+        for i in range(1101, 1166):
+            if df_gwkdx1.loc[i, 'gw_sum'] > 0:
+                df_gwkdx1.loc[i, 'gw_sum'] = df_gwkdx1.loc[i, 'gw_sum'] * gwzl
+        # print(df_gwkdx1)
+        df_temp2 = df_gwkdx1.copy()
+        for i in range(1101, 1166):
+            df_temp2.loc[i, '岗位'] = df_gwkdx1.loc[i, 'gw_sum'] + df_bygw.loc[i, 'gw_sum']
+        df_pdygw = df_temp2.loc[:, ['岗位']]
+        print(df_pdygw)
+
+        df_pdyrkgw = df_rk1.join(df_pdygw)
+        print(df_pdyrkgw)
+        df_pdyrkgw1 = df_pdyrkgw.loc[:, ['居住', '岗位']]
+        df_pdyrkgw1.columns = ['人口', '岗位']
+        print(df_pdyrkgw1)
+        df_pdyrkgw1.to_excel(str(var_rkgw_afclc.get()))
+        tk.messagebox.showinfo(message='计算完成！')
+
     btn_calcpe=tk.Button(win_calcpe,text='计算人口岗位',width=12,height=2,bg='#E6E6E6',fg='black',command=calcpe)
 
     # btn_calcpe=ttk.Button(win_calcpe ,text='计算位')
@@ -676,6 +832,19 @@ def CalcPopemp():
     cav_rddata = tk.Canvas(win_calcpe, width=800, height=10, relief=RAISED)
     cav_rddata.place(x=0, y=290)
     cav_rddata.create_line(50, 10, 800, 10, fill='black')
+
+
+
+    #查询计算后的人口岗位
+    def rkgw_query():
+        df_rkgw_query=pd.read_excel(str(var_rkgw_afclc.get()))
+        index1=int(var_rkgw_search.get())-1101
+
+        print(df_rkgw_query.loc[index1,'人口'])
+        rk=df_rkgw_query.loc[index1,'人口']
+        gw=df_rkgw_query.loc[index1,'岗位']
+        var_pop.set(int(rk))
+        var_emp.set(int(gw))
 
     lb_rkgw_query=ttk.Label(win_calcpe,text='查询交通小区人口岗位',font=('微软雅黑',14))
     lb_rkgw_query.place(x=90,y=350)
@@ -687,8 +856,8 @@ def CalcPopemp():
     ety_rkgw_search=ttk.Entry(win_calcpe,textvariable=var_rkgw_search)
     ety_rkgw_search.place(x=390,y=420)
 
-    lb_query=ttk.Button(win_calcpe,text='查询')
-    lb_query.place(x=620,y=420)
+    btn_query=ttk.Button(win_calcpe,text='查询',command=rkgw_query)
+    btn_query.place(x=620,y=420)
 
     lb_pop=ttk.Label(win_calcpe,text='小区人口:',font=('宋体',12))
     lb_pop.place(x=160,y=510)
