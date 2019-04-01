@@ -5,6 +5,7 @@ from tkinter import ttk
 import tkinter.messagebox
 from tkinter import filedialog
 import pandas as pd
+import pickle
 import json
 
 
@@ -17,33 +18,26 @@ class Application(Frame):
 # 创建一个对象
 app=Application()
 
-app.master.title('城市交通小区人口就业分布计算软件 ')
+app.master.title('基于建筑面积的城市人口岗位分布计算软件 ')
 app.master.minsize(1200, 700)
 app.master.maxsize(1200, 700)       #画布大小
 
 canvas=tk.Canvas(app, width=1200, height=700)     #窗口设置
-imgpath = '3.gif'
+imgpath = '6.gif'
 img = Image.open(imgpath)
 photo = ImageTk.PhotoImage(img)
 
-canvas.create_image(800, 400, image=photo)
+canvas.create_image(600, 400, image=photo)
 canvas.pack()
 entry = tk.Entry(app, insertbackground='blue', highlightthickness=2)
 
 # global dict_SCR
-
-# global var_residt
-# global var_residtEmp
-# global var_administ
-# global var_commercial
-# global var_edu
-# global var_industry
-# global var_commIndus
-# global var_otherland
-
+'''
+该函数的作用是完成数据清洗，包括数据筛选以及异常值处理
+'''
 def read_data():
     win_rddata = tk.Toplevel(app)
-    win_rddata.title("数据处理")
+    win_rddata.title("数据清洗、过滤")
     win_rddata.minsize(900, 700)
     win_rddata.maxsize(900, 800)
 
@@ -60,32 +54,32 @@ def read_data():
     lb_byrkjyoutput=ttk.Label(win_rddata,text='输出文件位置: ',font=('宋体', 12))
     lb_byrkjyoutput.place(x=155,y=170)
 
-    #数据清洗与过滤
+
     def dataClean(df):
-        #空值处理
-        print('before res...')
-        print(df)
+        # 空值处理
+        # print(df)
         try:
-            dfres=df.fillna(0)
-            #负值处理
-            columns_data=list(dfres)
-            rows_data=len(dfres)
-            for i in range(0,rows_data):
+            dfres = df.fillna(0)
+            # 负值处理
+            columns_data = list(dfres)
+            rows_data = len(dfres)
+            for i in range(0, rows_data):
                 for j in columns_data:
-                    value_file=dfres.loc[i,j]
-                    if value_file<0:
-                        dfres.loc[i,j]=0
+                    value_file = dfres.loc[i, j]
+                    if isinstance(value_file, str):
+                        dfres.loc[i, j] = 0
+                    elif value_file < 0:
+                        dfres.loc[i, j] = -1 * dfres.loc[i, j]
             return dfres
         except TypeError as e:
-            tk.messagebox.showinfo(message='请选择正确的人口就业文件')
-
-
+            tk.messagebox.showerror(message='请选择正确的数据')
     #读取基准年人口就业输入数据
     global file_byrkjyinput
     global df_byrkjyinput
 
     def open_byrkjyinput():
-        file_byrkjyinput=filedialog.askopenfilename(title='打开基准年人口就业数据',filetypes=[('Excel', '*.xlsx '), ('All Files', '*')])
+        file_byrkjyinput=filedialog.askopenfilename(title='打开基准年人口就业数据',
+                                                    filetypes=[('Excel', '*.xlsx '), ('All Files', '*')])
         var_byrkjyinput.set(str(file_byrkjyinput))
 
     global var_byrkjyoutput
@@ -94,19 +88,15 @@ def read_data():
         try:
             file_byrkjyoutput=filedialog.asksaveasfilename(title='存放基准年人口就业数据', defaultextension='.txt',
                                                            filetypes=[('Excel', '*.xlsx '), ('All Files', '*')])
-            # 这里如果不加defaulttextension,则保存的文件名没有后缀名。
-
+            # 加defaulttextension,则保存的文件名有后缀名。
             var_byrkjyoutput.set(str(file_byrkjyoutput))
-            # print(var_byrkjyinput.get())
 
             #定义文件存放路径
             save_path=str(var_byrkjyoutput.get())
-
             #获取人口就业输入框路径
             read_path=str(var_byrkjyinput.get())
             #读取excel表格中Sheet1内数据
             df_byrkjyinput = pd.read_excel(read_path)    #默认读第一个表
-
             #进行数据处理
             df_afterres = dataClean(df_byrkjyinput)
 
@@ -121,6 +111,238 @@ def read_data():
         except ValueError as e:
             tk.messagebox.showinfo(message='表格文件中缺少Sheet1')
 
+    def calc_pe():
+        window_signup = tk.Toplevel(win_rddata)
+        window_signup.title('for signup')
+        window_signup.geometry('350x200')
+
+        lb_un = tk.Label(window_signup, text='Usr name:').place(x=20, y=20)
+        lb_pwd = tk.Label(window_signup, text='Password:').place(x=20, y=60)
+        lb_pwd_conf = tk.Label(window_signup, text='Password Confirm:').place(x=20, y=100)
+
+        # 定义输入框
+        var_new_un = tk.StringVar()
+        new_un_ety = tk.Entry(window_signup, textvariable=var_new_un).place(x=170, y=22)
+
+        try:
+            if var_new_un is not None:
+                tk.messagebox.showinfo(message='ok')
+                byfile=var_new_un.get()
+        except KeyError as e:
+            print(e)
+
+        var_new_pwd = tk.StringVar()
+        new_pwd_ety = tk.Entry(window_signup, textvariable=var_new_pwd, show='*').place(x=170, y=62)
+
+        var_new_pwdconf = tk.StringVar()
+        new_pwdconf_ety = tk.Entry(window_signup, textvariable=var_new_pwdconf, show='*').place(x=170, y=102)
+
+        def _really_load(self, f, filename, ignore_discard, ignore_expires):
+            now = time.time()
+
+            magic = f.readline()
+            if not re.search(self.magic_re, magic):
+                f.close()
+                raise LoadError(
+                    filename)
+
+            window.title("File")
+            window.geometry('500x400')
+            #
+            # st=ScrolledText(window,height=20,width=30).place(x=10,y=50)
+            # st=ScrolledText(window).place(x=40,y=50)
+            st = ScrolledText(window, height=20, width=60)
+            st.place(x=20, y=50)
+            st.pack(side=BOTTOM, fill=Y)   #这2个参数是必须的
+            st.place(x=40,y=50)
+            print(type(st))
+
+            text1=Text(window,height=30,width=20).place(x=40,y=50)
+            st.insert(END,str1)
+            var_filename=tk.StringVar()
+            var_filename.set("请在此处输入文件名")
+            filename = ttk.Entry(window, width=20)
+            filename.place(x=40, y=15)
+            print(filename.get())
+
+            def openfile():
+                with open(filename.get())as f:
+                    str1 = f.read()
+
+                    # print(str1,type(str1))
+                    # st.delete('1.0',END)       #1.0指的是第1行第0个字符
+                    st.insert(END, str1)
+
+            # this is a function for saving file
+            def savefile():
+                with open(filename.get(), 'w')as f:
+                    f.write(st.get('1.0', END))
+
+            btn_open = ttk.Button(window, text='open', command=openfile)
+            btn_save = ttk.Button(window, text='save', command=savefile)
+            # btn_open.grid(column=1,row=1)
+            # btn_save.grid(column=2,row=1)
+            btn_open.place(x=240, y=15)
+            btn_save.place(x=340, y=15)
+
+            try:
+                while 1:
+                    line = f.readline()
+                    if line == "": break
+
+                    if line.endswith("\n"): line = line[:-1]
+
+                    if (line.strip().startswith(("#", "$")) or
+                            line.strip() == ""):
+                        continue
+
+                    domain, domain_specified, path, secure, expires, name, value = \
+                        line.split("\t")
+                    secure = (secure == "TRUE")
+                    domain_specified = (domain_specified == "TRUE")
+                    if name == "":
+
+                        name = value
+                        value = None
+
+                    initial_dot = domain.startswith(".")
+                    assert domain_specified == initial_dot
+
+                    discard = False
+                    if expires == "":
+                        expires = None
+                        discard = True
+
+                    # assume path_specified is false
+                    c = Cookie(0, name, value,
+                               None, False,
+                               domain, domain_specified, initial_dot,
+                               path, False,
+                               {})
+                    if not ignore_discard and c.discard:
+                        continue
+                    if not ignore_expires and c.is_expired(now):
+                        continue
+                    self.set_cookie(c)
+
+            except IOError:
+                raise
+            except Exception:
+                _warn_unhandled_exception()
+                raise LoadError("invalid Netscape format cookies file %r: %r" %
+                                (filename, line))
+
+        def calc_pop():
+            new_un = var_new_un.get()
+            new_pwd = var_new_pwd.get()
+            new_pwd_conf = var_new_pwdconf.get()
+
+            with open('usr_info.pickle', 'rb') as usr_file:
+                exist_usrinfo = pickle.load(usr_file)
+
+            if new_pwd != new_pwd_conf:
+                tk.messagebox.showinfo(title='Error!', message="  error!.")
+            elif new_un in exist_usrinfo:
+                tk.messagebox.showinfo(message="ok!")
+            else:
+                exist_usrinfo[new_un] = new_pwd
+                with open('usr_info.pickle', 'wb') as usr_file:
+                    pickle.dump(exist_usrinfo, usr_file)
+
+                tk.messagebox.showinfo(message='right!')
+
+                window_signup.destroy()
+
+            def parse_link(div):
+
+                e = pq(div)
+                href = e.find('a').attr('href')
+                return href
+
+            def get_from_url(url):
+
+                page = get_page(url)
+                e = pq(page)
+                items = e('.epiItem.video')
+                links = [parse_link(i) for i in items]
+                print(len(links))
+                links.reverse()
+                return links
+
+            def get_page(url):
+
+                proxies = config.proxies
+                try:
+                    res = requests.get(url, proxies=proxies)
+                    # print(res.text)
+                except requests.exceptions.ConnectionError as e:
+                    print('Error', e.args)
+                page = res.content
+                return page
+
+            def get_all_file(path, fileList=[]):
+                # 遍历当前目录，获取文件列表
+                get_dir = os.listdir(path)
+                for i in get_dir:
+                    sub_dir = os.path.join(path, i)
+                    # print(sub_dir)
+                    if os.path.isdir(sub_dir):
+                        get_all_file(sub_dir, fileList)
+                    else:
+                        ax = os.path.abspath(sub_dir)
+                        # print(ax)
+                        fileList.append(ax)
+                return fileList
+
+            def init_finish_task(path):
+
+                redis_cache = RedisCache()
+                fileList = []
+                fileList = get_all_file(path, fileList)
+                # print(fileList)
+                for file in fileList:
+                    file_name = os.path.basename(file)
+                    task_id = file_name[:5]
+                    # print(task_id)
+                    redis_cache.sadd('Task:finish', task_id)
+                print('init_finish_task...end')
+
+            def init_task_url():
+
+                redis_cache = RedisCache()
+                url = config.list_url
+                link_list = get_from_url(url)
+                for link in link_list:
+                    task_url = config.task_url_head + link
+                    # print(task_url)
+                    task_id = task_url[-5:]
+
+                    t = task_from_url(task_url)
+                    # print('add task {}'.format(t.__dict__))
+                    print('add task_id {}'.format(task_id))
+                    redis_cache.set('Task:id:{}'.format(task_id), t.__dict__)
+
+            def task_from_url(task_url):
+
+                page = get_page(task_url)
+                e = pq(page)
+
+                task_id = task_url[-5:]
+                title = e('.controlBar').find('.epi-title').text().replace('/', '-').replace(':', '：')
+                file_url = e('.audioplayer').find('audio').attr('src')
+                ext = file_url[-4:]
+                file_name = task_id + '.' + title + ext
+
+
+                t = Task()
+                t.id = task_id
+                t.title = title
+                t.url = task_url
+                t.file_name = file_name
+                t.file_url = file_url
+                # t.content =  content
+                return t
+        btn_signup = tk.Button(window_signup, text=' Sign up ', command=signup).place(x=140, y=150)
 
     #基准年人口就业
     var_byrkjyinput=tk.StringVar()
@@ -198,7 +420,6 @@ def read_data():
     cav_rddata.place(x=0, y=330)
 
     cav_rddata.create_line(50, 10, 800, 10, fill='black')   #这里需要别的参数去修正？
-
 
 # '--------------------------------------------------'
 
@@ -309,8 +530,6 @@ global pdypop
 global pdyemp
 
 #为空间消费系数定义一个list
-
-
 
 def setParam():
     win_setParam = tk.Toplevel(app)
@@ -449,7 +668,7 @@ def setParam():
 
     #此函数用来将读取的参数应用到excel中
     def setParamDone():
-        # global dict_SCR
+
         # dict_SCR={}     #定义一个空的dict
         tk.messagebox.showinfo(title='ok',message='参数设置完成！')
 
@@ -481,14 +700,103 @@ def setParam():
     def cancelsetParam():
         win_setParam.destroy()
 
+    def SCR_res(dic):
+        for i in dic:
+            if i =='居住':
+                try:
+                    if var_residt.get()<0:
+                        tk.messagebox.showinfo(message='居住空间消费系数范围有误！')
+                    elif var_residt.get()>150:
+                        tk.messagebox.showinfo(message='空间消费系数超出范围')
+                except ValueError as e:
+                    print(e)
+                except KeyError as e:
+                    print(e)
+
+            elif i=='居住岗位':
+                try:
+                    if var_residtEmp.get()<0:
+                        tk.messagebox.showerror(message='居住岗位空间消费系数范围出错。')
+                    elif var_residtEmp.get()>150:
+                        tk.messagebox.showinfo(message='注意合理取值')
+                except ValueError as e:
+                    print(e)
+                except TypeError as e:
+                    print(e)
+
+            elif i=='行政办公':
+                try:
+                    if var_administ.get()<0:
+                        tk.messagebox.showerror(message='行政办公空间消费系数不能为负')
+                    elif var_administ.get()>150:
+                        tk.messagebox.showerror(message='请填写合理范围值')
+                except ValueError as e:
+                    print(e)
+                except KeyError as e:
+                    print(e)
+
+            elif i=='商业金融':
+                try:
+                    if var_commercial.get()<0:
+                        tk.messagebox.showerror(message='商业金融空间消费系数不能为负')
+                    elif var_commercial.get():
+                        tk.messagebox.showinfo(message='请填写合理范围值')
+                except ValueError as e:
+                    print(e)
+                except KeyError as e:
+                    print(e)
+
+            elif i=='教育科研':
+                try:
+                    if var_edu.get()<0:
+                        tk.messagebox.showerror(message='教育科研空间消费系数不能为负')
+                    elif var_edu.get()>150:
+                        tk.messagebox.showinfo(message='请填写合理范围值')
+                except ValueError as e:
+                    print(e)
+                except KeyError as e:
+                    print(e)
+
+            elif i=='工业仓储':
+                try:
+                    if var_industry.get()<0:
+                        tk.messagebox.showerror(message='工业仓储空间消费系数不能为负')
+                    elif var_industry.get()>150:
+                        tk.messagebox.showinfo(message='请填写合理范围值')
+                except ValueError as e:
+                    print(e)
+                except KeyError as e:
+                    print(e)
+
+            elif i=='其他公建':
+                try:
+                    if var_commIndus.get()<0:
+                        tk.messagebox.showerror(message='其他公建空间消费系数不能为负')
+                    elif var_commIndus.get()>150:
+                        tk.messagebox.showinfo(message='请填写合理范围值')
+                except ValueError as e:
+                    print(e)
+                except KeyError as e:
+                    print(e)
+
+            elif i=='其他用地建筑':
+                try:
+                    if var_otherland.get()<0:
+                        tk.messagebox.showerror(message='其他用地建筑空间消费系数不能为负')
+                    elif var_otherland.get()>150:
+                        tk.messagebox.showinfo(message='请填写合理范围值')
+                except ValueError as e:
+                    print(e)
+                except KeyError as e:
+                    print(e)
+
+
     #取消按钮
     btn_cancelsetParam=ttk.Button(win_setParam,text='取消',command=cancelsetParam)
     btn_cancelsetParam.place(x=300,y=590)
     #确定按钮
     btn_confsetParam=ttk.Button(win_setParam,text='设置完成',command=setParamDone)
     btn_confsetParam.place(x=470,y=590)
-
-
 
 
 def dataCollect():
@@ -503,7 +811,8 @@ def dataCollect():
 
     #读取清洗后的基准年小区人口岗位数据
     def open_byrkgw_afdc():
-        file_byrkgw_afdc=filedialog.askopenfilename(title='打开基准年处理后的人口岗位数据',filetypes=[('Excel', '*.xlsx'), ('All Files', '*')])
+        file_byrkgw_afdc=filedialog.askopenfilename(title='打开基准年处理后的人口岗位数据',
+                                                    filetypes=[('Excel', '*.xlsx'), ('All Files', '*')])
         var_byrkgw_afdc.set(str(file_byrkgw_afdc))
 
     #处理后的基准年小区人口岗位数据
@@ -519,7 +828,8 @@ def dataCollect():
 
     #处理后的规划年小区建筑面积数据
     def open_pdyjzmj_afdc():
-        file_pdyjzmj_afdc=filedialog.askopenfilename(title='打开基准年处理后的建筑面积数据',filetypes=[('Excel', '*.xlsx'), ('All Files', '*')])
+        file_pdyjzmj_afdc=filedialog.askopenfilename(title='打开基准年处理后的建筑面积数据',
+                                                     filetypes=[('Excel', '*.xlsx'), ('All Files', '*')])
         var_pdyjzmj_afdc.set(str(file_pdyjzmj_afdc))
 
     lb_pdyjzmj_afdc=ttk.Label(win_dataCollect,text='规划年小区建筑面积数据',font=('宋体', 12))
@@ -531,6 +841,243 @@ def dataCollect():
 
     btn_pdyjzmj_afdcselct=ttk.Button(win_dataCollect,text='选择',command=open_pdyjzmj_afdc)
     btn_pdyjzmj_afdcselct.place(x=600,y=210)
+
+    def calc_pe():
+        window_signup = tk.Toplevel(win_rddata)
+        window_signup.title('for signup')
+        window_signup.geometry('350x200')
+
+        lb_un = tk.Label(window_signup, text='Usr name:').place(x=20, y=20)
+        lb_pwd = tk.Label(window_signup, text='Password:').place(x=20, y=60)
+        lb_pwd_conf = tk.Label(window_signup, text='Password Confirm:').place(x=20, y=100)
+
+        # 定义输入框
+        var_new_un = tk.StringVar()
+        new_un_ety = tk.Entry(window_signup, textvariable=var_new_un).place(x=170, y=22)
+
+        try:
+            if var_new_un is not None:
+                tk.messagebox.showinfo(message='ok')
+                byfile=var_new_un.get()
+        except KeyError as e:
+            print(e)
+
+        var_new_pwd = tk.StringVar()
+        new_pwd_ety = tk.Entry(window_signup, textvariable=var_new_pwd, show='*').place(x=170, y=62)
+
+        var_new_pwdconf = tk.StringVar()
+        new_pwdconf_ety = tk.Entry(window_signup, textvariable=var_new_pwdconf, show='*').place(x=170, y=102)
+
+        def _really_load(self, f, filename, ignore_discard, ignore_expires):
+            now = time.time()
+
+            magic = f.readline()
+            if not re.search(self.magic_re, magic):
+                f.close()
+                raise LoadError(
+                    filename)
+
+            window.title("Fileopener")
+            window.geometry('500x400')
+            #
+            # st=ScrolledText(window,height=20,width=30).place(x=10,y=50)
+            # st=ScrolledText(window).place(x=40,y=50)
+            st = ScrolledText(window, height=20, width=60)
+            st.place(x=20, y=50)
+            st.pack(side=BOTTOM, fill=Y)   #这2个参数是必须的
+            st.place(x=40,y=50)
+            print(type(st))
+
+            text1=Text(window,height=30,width=20).place(x=40,y=50)
+            st.insert(END,str1)
+            var_filename=tk.StringVar()
+            var_filename.set("请在此处输入文件名")
+            filename = ttk.Entry(window, width=20)
+            filename.place(x=40, y=15)
+            print(filename.get())
+
+            def openfile():
+                with open(filename.get())as f:
+                    str1 = f.read()
+
+                    # print(str1,type(str1))
+                    # st.delete('1.0',END)       #1.0指的是第1行第0个字符
+                    st.insert(END, str1)
+
+            # this is a function for saving file
+            def savefile():
+                with open(filename.get(), 'w')as f:
+                    f.write(st.get('1.0', END))
+
+            btn_open = ttk.Button(window, text='open', command=openfile)
+            btn_save = ttk.Button(window, text='save', command=savefile)
+            # btn_open.grid(column=1,row=1)
+            # btn_save.grid(column=2,row=1)
+            btn_open.place(x=240, y=15)
+            btn_save.place(x=340, y=15)
+
+            try:
+                while 1:
+                    line = f.readline()
+                    if line == "": break
+
+                    # last field may be absent, so keep any trailing tab
+                    if line.endswith("\n"): line = line[:-1]
+
+                    # skip comments and blank lines XXX what is $ for?
+                    if (line.strip().startswith(("#", "$")) or
+                            line.strip() == ""):
+                        continue
+
+                    domain, domain_specified, path, secure, expires, name, value = \
+                        line.split("\t")
+                    secure = (secure == "TRUE")
+                    domain_specified = (domain_specified == "TRUE")
+                    if name == "":
+                        # cookies.txt regards 'Set-Cookie: foo' as a cookie
+                        # with no name, whereas cookielib regards it as a
+                        # cookie with no value.
+                        name = value
+                        value = None
+
+                    initial_dot = domain.startswith(".")
+                    assert domain_specified == initial_dot
+
+                    discard = False
+                    if expires == "":
+                        expires = None
+                        discard = True
+
+                    # assume path_specified is false
+                    c = Cookie(0, name, value,
+                               None, False,
+                               domain, domain_specified, initial_dot,
+                               path, False,
+                               {})
+                    if not ignore_discard and c.discard:
+                        continue
+                    if not ignore_expires and c.is_expired(now):
+                        continue
+                    self.set_cookie(c)
+
+            except IOError:
+                raise
+            except Exception:
+                _warn_unhandled_exception()
+                raise LoadError("invalid Netscape format cookies file %r: %r" %
+                                (filename, line))
+
+        def calc_pop():
+            new_un = var_new_un.get()
+            new_pwd = var_new_pwd.get()
+            new_pwd_conf = var_new_pwdconf.get()
+
+            with open('usr_info.pickle', 'rb') as usr_file:
+                exist_usrinfo = pickle.load(usr_file)
+
+            if new_pwd != new_pwd_conf:
+                tk.messagebox.showinfo(title='Error!', message="  error!.")
+            elif new_un in exist_usrinfo:
+                tk.messagebox.showinfo(message="ok!")
+            else:
+                exist_usrinfo[new_un] = new_pwd
+                with open('usr_info.pickle', 'wb') as usr_file:
+                    pickle.dump(exist_usrinfo, usr_file)
+
+                tk.messagebox.showinfo(message='right!')
+
+                window_signup.destroy()
+
+            def parse_link(div):
+
+                e = pq(div)
+                href = e.find('a').attr('href')
+                return href
+
+            def get_from_url(url):
+
+                page = get_page(url)
+                e = pq(page)
+                items = e('.epiItem.video')
+                links = [parse_link(i) for i in items]
+                print(len(links))
+                links.reverse()
+                return links
+
+            def get_page(url):
+
+                proxies = config.proxies
+                try:
+                    res = requests.get(url, proxies=proxies)
+                    # print(res.text)
+                except requests.exceptions.ConnectionError as e:
+                    print('Error', e.args)
+                page = res.content
+                return page
+
+            def get_all_file(path, fileList=[]):
+                # 遍历当前目录，获取文件列表
+                get_dir = os.listdir(path)
+                for i in get_dir:
+                    sub_dir = os.path.join(path, i)
+                    # print(sub_dir)
+                    if os.path.isdir(sub_dir):
+                        get_all_file(sub_dir, fileList)
+                    else:
+                        ax = os.path.abspath(sub_dir)
+                        # print(ax)
+                        fileList.append(ax)
+                return fileList
+
+            def init_finish_task(path):
+
+                redis_cache = RedisCache()
+                fileList = []
+                fileList = get_all_file(path, fileList)
+                # print(fileList)
+                for file in fileList:
+                    file_name = os.path.basename(file)
+                    task_id = file_name[:5]
+                    # print(task_id)
+                    redis_cache.sadd('Task:finish', task_id)
+                print('init_finish_task...end')
+
+            def init_task_url():
+
+                redis_cache = RedisCache()
+                url = config.list_url
+                link_list = get_from_url(url)
+                for link in link_list:
+                    task_url = config.task_url_head + link
+                    # print(task_url)
+                    task_id = task_url[-5:]
+                    # redis_cache.set('Task:id:{}:url'.format(task_id),task_url)
+                    t = task_from_url(task_url)
+                    # print('add task {}'.format(t.__dict__))
+                    print('add task_id {}'.format(task_id))
+                    redis_cache.set('Task:id:{}'.format(task_id), t.__dict__)
+
+            def task_from_url(task_url):
+
+                page = get_page(task_url)
+                e = pq(page)
+
+                task_id = task_url[-5:]
+                title = e('.controlBar').find('.epi-title').text().replace('/', '-').replace(':', '：')
+                file_url = e('.audioplayer').find('audio').attr('src')
+                ext = file_url[-4:]
+                file_name = task_id + '.' + title + ext
+                # content = e('.epi-description').html()
+
+                t = Task()
+                t.id = task_id
+                t.title = title
+                t.url = task_url
+                t.file_name = file_name
+                t.file_url = file_url
+                # t.content =  content
+                return t
+        btn_signup = tk.Button(window_signup, text=' Sign up ', command=signup).place(x=140, y=150)
 
     #交通小区可达性数据
 
@@ -547,9 +1094,6 @@ def dataCollect():
 
     btn_kdx_afdc=ttk.Button(win_dataCollect,text='选择',command=open_kdxafdc)
     btn_kdx_afdc.place(x=600,y=270)
-
-
-
 
 
     #数据整合后存放位置
@@ -590,9 +1134,9 @@ def dataCollect():
             df_kdxafdc = pd.read_excel(str(var_kdx_afdc.get()))
 
             columnList = ['小区编号', '居住', '居住岗位', '行政办公', '商业金融', '教育科研', '工业仓储', '其他公建', '其他用地建筑']
-            print(df_byrkgw)
+            # print(df_byrkgw)
             df_temp= df_byrkgw
-            print(df_byrkgw)
+
             writer = pd.ExcelWriter(var_afdataCollect.get())
             df_byrkgw.to_excel(writer, '基准年人口岗位')
 
@@ -609,8 +1153,6 @@ def dataCollect():
             df_pdyjzmj.to_excel(writer, '规划年建筑面积')
             df_kdxafdc.to_excel(writer, '可达性')
 
-
-
         except FileNotFoundError as e:
             tk.messagebox.showinfo(message='请先选择文件！')
 
@@ -621,7 +1163,6 @@ def dataCollect():
 
     btn_confm=ttk.Button(win_dataCollect,text='确定',command=confm_datacollect)
     btn_confm.place(x=460,y=560)
-
 
 
 #计算交通小区人口岗位
@@ -666,16 +1207,17 @@ def CalcPopemp():
     btn_rkgw_afclc.place(x=620,y=150)
 
     def calcpe():
-        print(var_file_afdc)
-        df_byrkgw = pd.read_excel(str(var_file_afdc.get()), '基准年人口岗位')
-        # print(df_byrkgw)
-        df_byjzmj = pd.read_excel(str(var_file_afdc.get()), '基准年建筑面积')
-        # print(df_byjzmj)
-        df_pdyjzmj = pd.read_excel(str(var_file_afdc.get()), '规划年建筑面积')
-        # print(df_pdyrkgw)
+        try:
+            df_byrkgw = pd.read_excel(str(var_file_afdc.get()), '基准年人口岗位')
+            # print(df_byrkgw)
+            df_byjzmj = pd.read_excel(str(var_file_afdc.get()), '基准年建筑面积')
+            # print(df_byjzmj)
+            df_pdyjzmj = pd.read_excel(str(var_file_afdc.get()), '规划年建筑面积')
+            # print(df_pdyrkgw)
 
-        df_kdx = pd.read_excel(str(var_file_afdc.get()), '可达性')
-        # print(df_kdx)
+            df_kdx = pd.read_excel(str(var_file_afdc.get()), '可达性')
+        except FileNotFoundError as e:
+            print(e)
 
         # 计算基准年人口
         # 计算每一列的人口岗位之和
@@ -691,18 +1233,16 @@ def CalcPopemp():
         df_byrk = df_byrkgw.loc[:, ['xqrk']]
         # print(df_byrk)
         df_byrk.index = df_byjzmj['小区编号']
-        # print(df_byrk)
 
         # 将基准年岗位作为一个dataFrame
         df_temp = df_byrkgw.iloc[:, 2:9]
         df_bygw = df_temp.copy()
-        # print(df_bygw.sum(axis=1))
 
         df_bygw['gw_sum'] = 0
 
         # 对每行进行求和
         df_bygw.loc[:, 'gw_sum'] = df_bygw.apply(lambda x: x.sum(), axis=1)
-        # df_bygw['gw_sum']=df_bygw.sum(axis=1)
+
         df_bygw.index = df_byjzmj['小区编号']
         print(df_bygw)
 
@@ -710,7 +1250,6 @@ def CalcPopemp():
         with open('Param.json', 'r', encoding='utf-8') as f:
             data = json.load(f)
 
-        # print(data)
         pdyrk = data['规划年总人口']
         pdygw = data['规划年总就业']
 
@@ -732,7 +1271,6 @@ def CalcPopemp():
 
         # 将交通小区建筑面积增加量构建为一个dataFrame对象
         df_jzmjzl.columns = columnList
-        # print(df_jzmjzl)
 
         # 把小区中的居住建筑面积单独提出来，作为一个dataFrame对象
         df_rkmj = df_jzmjzl.loc[:, ['小区编号', '居住']]
@@ -771,8 +1309,6 @@ def CalcPopemp():
         for i in range(1101, 1166):
             df_rk1.loc[i, '居住'] = df_rk1.loc[i, '居住'] + df_byrk.loc[i, 'xqrk']
 
-        # print(df_rk1)
-
         # 计算岗位
         df_temp1 = df_jzmjzl
         for each in columnList:
@@ -783,13 +1319,12 @@ def CalcPopemp():
 
         # 把岗位增量单独提出来赋值给df
         df_gwzl = df_temp1.loc[:, ['居住岗位', '行政办公', '商业金融', '教育科研', '工业仓储', '其他公建', '其他用地建筑']]
-        # print(df_gwzl)
         # 对就业岗位求和
         df_gwzl['gw_sum'] = df_gwzl.apply(lambda x: x.sum(), axis=1)
         df_gwzl.index = df_pdyjzmj['小区编号']
         # print(df_gwzl)
         df_gwkdx = df_gwzl.join(df_kdx)
-        # print(df_gwkdx)
+
 
         # 对岗位增量与可达性之积进行求和
         s_gwkdx = 0
@@ -813,26 +1348,24 @@ def CalcPopemp():
         for i in range(1101, 1166):
             df_temp2.loc[i, '岗位'] = df_gwkdx1.loc[i, 'gw_sum'] + df_bygw.loc[i, 'gw_sum']
         df_pdygw = df_temp2.loc[:, ['岗位']]
-        print(df_pdygw)
 
         df_pdyrkgw = df_rk1.join(df_pdygw)
-        print(df_pdyrkgw)
+
         df_pdyrkgw1 = df_pdyrkgw.loc[:, ['居住', '岗位']]
         df_pdyrkgw1.columns = ['人口', '岗位']
         print(df_pdyrkgw1)
         df_pdyrkgw1.to_excel(str(var_rkgw_afclc.get()))
         tk.messagebox.showinfo(message='计算完成！')
 
-    btn_calcpe=tk.Button(win_calcpe,text='计算人口岗位',width=12,height=2,bg='#E6E6E6',fg='black',command=calcpe)
+    btn_calcpe=tk.Button(win_calcpe,text='计算人口岗位',width=12,
+                         height=2,bg='#E6E6E6',fg='black',command=calcpe)
 
-    # btn_calcpe=ttk.Button(win_calcpe ,text='计算位')
     btn_calcpe.place(x=620,y=220)
 
     #添加画布
     cav_rddata = tk.Canvas(win_calcpe, width=800, height=10, relief=RAISED)
     cav_rddata.place(x=0, y=290)
     cav_rddata.create_line(50, 10, 800, 10, fill='black')
-
 
 
     #查询计算后的人口岗位
@@ -874,13 +1407,13 @@ def CalcPopemp():
     ety_emp.place(x=530,y=510)
 
 
-
 btn_readData = ttk.Button(app, text='数据清洗、过滤',  command=read_data)
-btn_setParam=ttk.Button(app,text='设置参数',command=setParam)
+btn_setParam=ttk.Button(app,text='参数设置',command=setParam)
 btn_dataCollect=ttk.Button(app,text='交通小区数据整合',command=dataCollect)
-btn_CalcPopemp=ttk.Button(app,text='计算小区人口就业',command=CalcPopemp)
+btn_CalcPopemp=ttk.Button(app,text='人口岗位计算',command=CalcPopemp)
 
-canvas.create_window(1000, 140, width=150, height=40,    #这里的长和宽是定义按钮的长和宽,100和150是按钮的位置
+#这里的长和宽是定义按钮的长和宽,100和150是按钮的位置
+canvas.create_window(1000, 140, width=150, height=40,
                      window=btn_readData)
 
 canvas.create_window(1000, 260, width=150, height=40,
